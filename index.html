@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Every perk your credit cards actually unlock at 12 US airports — lounges, gaming, spas, dining credits — sorted by how far it is from your gate.">
+<meta name="description" content="Every perk your credit cards actually unlock at 22 US airports — lounges, gaming, spas, dining credits — sorted by how far it is from your gate.">
 <meta name="color-scheme" content="light dark">
 <meta property="og:title" content="Layover">
 <meta property="og:description" content="Every perk your credit cards actually unlock at this airport, sorted by how far it is from your gate.">
@@ -337,6 +337,36 @@
     font-size: 14px;
   }
   .wallet > summary::-webkit-details-marker { display: none; }
+  /* Sticky so the close control stays reachable however far down the list you get. */
+  .wallet[open] > summary {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--surface);
+    border-radius: var(--r-sm) var(--r-sm) 0 0;
+  }
+  .wallet > summary::after {
+    content: "\25BE";
+    font-size: 10px;
+    color: var(--ink-3);
+  }
+  .wallet[open] > summary::after { content: "\25B4"; }
+
+  .wallet-done {
+    display: block;
+    width: 100%;
+    margin-top: 18px;
+    padding: 11px;
+    border: none;
+    border-radius: var(--r-sm);
+    background: var(--board);
+    color: #FFFFFF;
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .wallet-done:hover { background: var(--ink); }
   .wallet-count {
     font-family: "IBM Plex Mono", monospace;
     font-size: 11px;
@@ -886,7 +916,7 @@
   <header class="masthead">
     <div class="masthead-top">
       <h1 class="wordmark">Layo<em>ver</em></h1>
-      <span class="stamp">12 airports &middot; Verified Sep 2026</span>
+      <span class="stamp">22 airports &middot; Verified Sep 2026</span>
     </div>
     <p>Every perk your cards actually unlock at this airport &mdash; lounges, gaming, spa treatments, dining credits &mdash; sorted by how far it is from your gate.</p>
   </header>
@@ -918,17 +948,17 @@
       </div>
     </div>
 
-    <details class="wallet" id="wallet">
+    <details class="wallet">
       <summary>
         <span>My cards</span>
-        <span class="wallet-count" id="walletCount">1 selected</span>
+        <span class="wallet-count" data-wallet-count>1 selected</span>
       </summary>
-      <div class="wallet-body" id="walletBody"></div>
+      <div class="wallet-body" data-wallet-body></div>
     </details>
 
     <label class="dod">
       <input type="checkbox" id="dod">
-      <span><b>I carry a DoD ID</b> &mdash; active duty, Reserve, Guard, retiree, or a dependent with their own ID. Veterans without a DoD ID are not eligible for USO centers.</span>
+      <span><b>I have a military ID</b> &mdash; serving, retired, a dependent, or a veteran. Eligibility differs by venue, so each one below states who it admits.</span>
     </label>
   </section>
 
@@ -960,6 +990,14 @@
         <label class="field-label" for="income">Household income</label>
         <select id="income"></select>
       </div>
+
+      <details class="wallet">
+        <summary>
+          <span>My cards</span>
+          <span class="wallet-count" data-wallet-count>1 selected</span>
+        </summary>
+        <div class="wallet-body" data-wallet-body></div>
+      </details>
     </section>
 
     <div id="planResults"></div>
@@ -967,7 +1005,7 @@
   </div><!-- /panel-plan -->
 
   <footer>
-    <p><b>Prototype.</b> Perk data is hand-curated across 12 airports and 32 cards, and reflects public sources as of September 2026. Airport benefits change constantly &mdash; lounges leave networks, restaurants drop out, terminals get reassigned. Confirm in your issuer's app before you count on anything here.</p>
+    <p><b>Prototype.</b> Perk data is hand-curated across 22 airports and 32 cards, and reflects public sources as of September 2026. Airport benefits change constantly &mdash; lounges leave networks, restaurants drop out, terminals get reassigned. Confirm in your issuer's app before you count on anything here.</p>
     <p><b>Open now</b> is calculated in the airport's own timezone, not your phone's. Venues with irregular hours show their schedule without a badge rather than risk a wrong one, and anything shut drops to the bottom of its terminal.</p>
     <p><b>Getting there.</b> When you set a terminal, every other terminal is marked with whether you can walk to it without clearing security again. Where a connection is uncertain we err toward telling you to re-screen &mdash; a wasted walk costs you minutes, a missed connection costs you the flight.</p>
     <p><b>Military access</b> is compiled from USO's published admissions policy and airline baggage pages, not from lived experience &mdash; verify with the USO app before relying on it. The eligibility line that catches people out: active duty, Reserve, Guard, retirees and dependents with a DoD ID all qualify, but veterans without one do not. Baggage rules also differ sharply between travelling on orders and travelling personally.</p>
@@ -991,7 +1029,15 @@ const PROGRAMS = {
   'united-club':   'United Club',
   'alaska':        'Alaska Lounge',
   'plaza-premium': 'Plaza Premium',
-  'military':      'DoD ID'
+  'military':         'Military ID',
+  'military-uniform': 'Military ID, in uniform'
+};
+
+/* Some airline clubs admit service members in uniform with no card at all —
+   a free-lounge route nothing else surfaces. Conditions differ by carrier. */
+const UNIFORM_RULES = {
+  'Admirals Club': 'Free for US military in uniform with a military ID and a same-day American boarding pass. Immediate family or up to two guests may join you.',
+  'United Club':   'Free for US military in uniform, or on presentation of leave orders or R&R papers.'
 };
 
 /* Airline military baggage and boarding. Rules differ sharply between travelling
@@ -1135,17 +1181,17 @@ const CARDS = [
    have not mapped it yet, which the app says out loud rather than guessing.
 ============================================================================= */
 const AIRLINES = {
-  'American':        { JFK:['Terminal 8'], LGA:['Terminal B'], EWR:['Terminal A'], SFO:['Terminal 1'], LAX:['Terminal 4'], DFW:['Terminal A','Terminal B','Terminal C','Terminal D'], DEN:['Concourse C'], PHX:['Terminal 4'], MIA:['Concourse D'], PHL:['Terminal A','Terminal B','Terminal C','Terminal F'], DCA:['Concourse C','Concourse D','Concourse E'], IAD:['Concourse B'] },
-  'Delta':           { JFK:['Terminal 4'], LGA:['Terminal C'], EWR:['Terminal A'], SFO:['Terminal 1'], LAX:['Terminal 3'], DFW:['Terminal E'], DEN:['Concourse A'], PHX:['Terminal 3'], MIA:['Concourse H'], PHL:['Terminal D/E'], DCA:['Concourse B'], IAD:['Concourse B'] },
-  'United':          { JFK:[], LGA:['Terminal B'], EWR:['Terminal C'], SFO:['Terminal 3','International Terminal G'], LAX:['Terminal 7'], DFW:['Terminal E'], DEN:['Concourse B'], PHX:['Terminal 3'], PHL:['Terminal C'], DCA:['Concourse B'], IAD:['Concourse C','Concourse D'] },
-  'JetBlue':         { JFK:['Terminal 5'], LGA:['Terminal B'], EWR:['Terminal A'], SFO:['Terminal 1'], LAX:['Terminal 6'], DFW:[], MIA:['Concourse E'], PHL:['Terminal D/E'], DCA:['Concourse B'] },
-  'Alaska':          { JFK:[], EWR:['Terminal A'], SFO:['Terminal 1'], LAX:['Terminal 6'], DFW:['Terminal E'], DEN:['Concourse A'], PHX:['Terminal 3'], DCA:['Concourse B'] },
-  'Southwest':       { JFK:[], LGA:['Terminal B'], SFO:['Terminal 1'], LAX:['Terminal 1'], DFW:[], DEN:['Concourse C'], PHX:['Terminal 4'], MIA:['Concourse H'], PHL:['Terminal D/E'], DCA:['Concourse B'],
+  'American':        { JFK:['Terminal 8'], LGA:['Terminal B'], EWR:['Terminal A'], SFO:['Terminal 1'], LAX:['Terminal 4'], DFW:['Terminal A','Terminal B','Terminal C','Terminal D'], DEN:['Concourse C'], PHX:['Terminal 4'], MIA:['Concourse D'], PHL:['Terminal A','Terminal B','Terminal C','Terminal F'], DCA:['Concourse C','Concourse D','Concourse E'], IAD:['Concourse B'], ATL:['Concourse T'], ORD:['Terminal 3'], CLT:['Concourse A','Concourse B','Concourse C','Concourse D','Concourse E'], SEA:['Concourse A'], BOS:['Terminal B'], IAH:['Terminal A'], MSP:['Concourse C'], DTW:['Evans Terminal'], LAS:['Concourse D'], MCO:['Terminal B'] },
+  'Delta':           { JFK:['Terminal 4'], LGA:['Terminal C'], EWR:['Terminal A'], SFO:['Terminal 1'], LAX:['Terminal 3'], DFW:['Terminal E'], DEN:['Concourse A'], PHX:['Terminal 3'], MIA:['Concourse H'], PHL:['Terminal D/E'], DCA:['Concourse B'], IAD:['Concourse B'], ATL:['Concourse A','Concourse B','Concourse C','Concourse D','Concourse E','Concourse F'], ORD:['Terminal 5'], CLT:['Concourse A'], SEA:['Concourse A'], BOS:['Terminal A'], IAH:['Terminal A'], MSP:['Concourse C','Concourse E','Concourse F','Concourse G'], DTW:['McNamara Terminal'], LAS:['Concourse E'], MCO:['Terminal B'] },
+  'United':          { JFK:[], LGA:['Terminal B'], EWR:['Terminal C'], SFO:['Terminal 3','International Terminal G'], LAX:['Terminal 7'], DFW:['Terminal E'], DEN:['Concourse B'], PHX:['Terminal 3'], PHL:['Terminal C'], DCA:['Concourse B'], IAD:['Concourse C','Concourse D'], ATL:['Concourse T'], ORD:['Terminal 1','Terminal 2'], CLT:['Concourse D'], SEA:['Concourse B'], BOS:['Terminal B'], IAH:['Terminal A','Terminal C','Terminal E'], MSP:['Concourse E'], DTW:['Evans Terminal'], LAS:['Concourse D'], MCO:['Terminal B'] },
+  'JetBlue':         { JFK:['Terminal 5'], LGA:['Terminal B'], EWR:['Terminal A'], SFO:['Terminal 1'], LAX:['Terminal 6'], DFW:[], MIA:['Concourse E'], PHL:['Terminal D/E'], DCA:['Concourse B'], BOS:['Terminal C'], MCO:['Terminal A'], LAS:['Concourse C'], ORD:['Terminal 3'] },
+  'Alaska':          { JFK:[], EWR:['Terminal A'], SFO:['Terminal 1'], LAX:['Terminal 6'], DFW:['Terminal E'], DEN:['Concourse A'], PHX:['Terminal 3'], DCA:['Concourse B'], SEA:['Concourse C','Concourse D','North Satellite'], BOS:['Terminal B'], ORD:['Terminal 3'], LAS:['Concourse C'], MCO:['Terminal B'] },
+  'Southwest':       { JFK:[], LGA:['Terminal B'], SFO:['Terminal 1'], LAX:['Terminal 1'], DFW:[], DEN:['Concourse C'], PHX:['Terminal 4'], MIA:['Concourse H'], PHL:['Terminal D/E'], DCA:['Concourse B'], ATL:['Concourse C'], ORD:['Terminal 5'], BOS:['Terminal A'], MSP:['Concourse C'], DTW:['Evans Terminal'], LAS:['Concourse B','Concourse C'], MCO:['Terminal A'],
                        note:{ DFW:'Southwest does not fly from DFW — they use Dallas Love Field (DAL).' } },
-  'British Airways': { JFK:['Terminal 8'], EWR:['Terminal B'], SFO:['International Terminal A'], LAX:['Tom Bradley International'], DFW:['Terminal D'], DEN:['Concourse C'], PHX:['Terminal 4'], MIA:['Concourse E'], PHL:['Terminal A'], IAD:['Concourse B'] },
-  'Air France / KLM':{ JFK:['Terminal 1'], SFO:['International Terminal A'], LAX:['Tom Bradley International'], DFW:['Terminal D'], IAD:['Terminal A'], MIA:['Concourse E'] },
-  'Emirates':        { JFK:['Terminal 4'], EWR:['Terminal B'], SFO:['International Terminal A'], LAX:['Tom Bradley International'], DFW:['Terminal D'], MIA:['Concourse E'], IAD:['Terminal A'] },
-  'Turkish Airlines':{ JFK:['Terminal 1'], EWR:['Terminal B'], SFO:['International Terminal A'], LAX:['Tom Bradley International'], DFW:['Terminal D'], MIA:['Concourse E'], IAD:['Concourse B'] }
+  'British Airways': { JFK:['Terminal 8'], EWR:['Terminal B'], SFO:['International Terminal A'], LAX:['Tom Bradley International'], DFW:['Terminal D'], DEN:['Concourse C'], PHX:['Terminal 4'], MIA:['Concourse E'], PHL:['Terminal A'], IAD:['Concourse B'], ORD:['Terminal 5'], BOS:['Terminal E'], SEA:['South Satellite'], IAH:['Terminal D'], ATL:['Concourse F'], LAS:['Concourse E'], MCO:['Terminal C'] },
+  'Air France / KLM':{ JFK:['Terminal 1'], SFO:['International Terminal A'], LAX:['Tom Bradley International'], DFW:['Terminal D'], IAD:['Terminal A'], MIA:['Concourse E'], ORD:['Terminal 5'], BOS:['Terminal E'], IAH:['Terminal D'], ATL:['Concourse F'], SEA:['South Satellite'], MSP:['Concourse G'], DTW:['McNamara Terminal'] },
+  'Emirates':        { JFK:['Terminal 4'], EWR:['Terminal B'], SFO:['International Terminal A'], LAX:['Tom Bradley International'], DFW:['Terminal D'], MIA:['Concourse E'], IAD:['Terminal A'], ORD:['Terminal 5'], BOS:['Terminal E'], SEA:['South Satellite'], IAH:['Terminal D'], ATL:['Concourse F'] },
+  'Turkish Airlines':{ JFK:['Terminal 1'], EWR:['Terminal B'], SFO:['International Terminal A'], LAX:['Tom Bradley International'], DFW:['Terminal D'], MIA:['Concourse E'], IAD:['Concourse B'], ORD:['Terminal 5'], BOS:['Terminal E'], SEA:['South Satellite'], IAH:['Terminal D'], ATL:['Concourse F'] }
 };
 
 /* ============================ INCOME BANDS ============================
@@ -1182,7 +1228,7 @@ const AIRPORTS = {
          airside:[['Terminal A','Terminal B','Terminal C','Terminal D','Terminal E']] },
   DEN: { city:'Denver',              tz:'America/Denver', terminals:['Concourse A','Concourse B','Concourse C'],
          airside:[['Concourse A','Concourse B','Concourse C']],
-         note:'Denver has no Priority Pass lounges, restaurants or experiences at all — the only card lounges here are Capital One, Centurion and the airline clubs.' },
+         note:'Denver has no Priority Pass lounges — card lounge access here means Capital One, Centurion or an airline club. Two Priority Pass restaurants do participate.' },
   PHX: { city:'Phoenix',             tz:'America/Phoenix', terminals:['Terminal 3','Terminal 4'],
          airside:[['Terminal 3'],['Terminal 4']] },
   MIA: { city:'Miami',               tz:'America/New_York', terminals:['Concourse D','Concourse E','Concourse H','Concourse J'],
@@ -1191,9 +1237,30 @@ const AIRPORTS = {
          airside:[['Terminal A','Terminal B','Terminal C','Terminal D/E','Terminal F']] },
   DCA: { city:'Washington — Reagan', tz:'America/New_York', terminals:['Concourse B','Concourse C','Concourse D','Concourse E'],
          airside:[['Concourse B','Concourse C','Concourse D','Concourse E']],
-         note:'Reagan National has no Priority Pass lounges, restaurants or experiences. Card access here means Capital One, Amex or an airline club.' },
+         note:'Reagan National has no Priority Pass lounges — card lounge access means Capital One, Amex or an airline club. Two Priority Pass restaurants do participate.' },
   IAD: { city:'Washington — Dulles', tz:'America/New_York', terminals:['Main Terminal','Terminal A','Concourse B','Concourse C','Concourse D','Concourse E'],
-         airside:[['Main Terminal','Terminal A','Concourse B','Concourse C','Concourse D','Concourse E']] }
+         airside:[['Main Terminal','Terminal A','Concourse B','Concourse C','Concourse D','Concourse E']] },
+  ATL: { city:'Atlanta',             tz:'America/New_York', terminals:['Concourse T','Concourse A','Concourse B','Concourse C','Concourse D','Concourse E','Concourse F'],
+         airside:[['Concourse T','Concourse A','Concourse B','Concourse C','Concourse D','Concourse E','Concourse F']] },
+  ORD: { city:'Chicago — O\u2019Hare',   tz:'America/Chicago', terminals:['Terminal 1','Terminal 2','Terminal 3','Terminal 5'],
+         airside:[['Terminal 1','Terminal 2','Terminal 3'],['Terminal 5']] },
+  CLT: { city:'Charlotte',           tz:'America/New_York', terminals:['Main Terminal','Concourse A','Concourse B','Concourse C','Concourse D','Concourse E'],
+         airside:[['Main Terminal','Concourse A','Concourse B','Concourse C','Concourse D','Concourse E']] },
+  SEA: { city:'Seattle',             tz:'America/Los_Angeles', terminals:['Central Terminal','Concourse A','Concourse B','Concourse C','Concourse D','North Satellite','South Satellite'],
+         airside:[['Central Terminal','Concourse A','Concourse B','Concourse C','Concourse D','North Satellite','South Satellite']] },
+  BOS: { city:'Boston',              tz:'America/New_York', terminals:['Terminal A','Terminal B','Terminal C','Terminal E'],
+         airside:[['Terminal B','Terminal C','Terminal E'],['Terminal A']] },
+  IAH: { city:'Houston',             tz:'America/Chicago', terminals:['Terminal A','Terminal B','Terminal C','Terminal D','Terminal E'],
+         airside:[['Terminal A','Terminal B','Terminal C','Terminal D','Terminal E']] },
+  MSP: { city:'Minneapolis',         tz:'America/Chicago', terminals:['Concourse C','Concourse E','Concourse F','Concourse G'],
+         airside:[['Concourse C','Concourse E','Concourse F','Concourse G']] },
+  DTW: { city:'Detroit',             tz:'America/New_York', terminals:['McNamara Terminal','Evans Terminal'],
+         airside:[['McNamara Terminal'],['Evans Terminal']],
+         note:'The two terminals at DTW are not connected after security — the shuttle between them drops you landside.' },
+  LAS: { city:'Las Vegas',           tz:'America/Los_Angeles', terminals:['Concourse B','Concourse C','Concourse D','Concourse E'],
+         airside:[['Concourse B','Concourse C','Concourse D','Concourse E']] },
+  MCO: { city:'Orlando',             tz:'America/New_York', terminals:['Terminal A','Terminal B','Terminal C'],
+         airside:[['Terminal A','Terminal B'],['Terminal C']] },
 };
 
 /* Guest rules keyed by issuer + program. 2026 saw big changes here — Capital One
@@ -1247,40 +1314,40 @@ const PERKS = [
 
   { a:'JFK', t:'Terminal 8', g:'8',   lvl:null,                 n:'Gameway',                   k:'Gaming',    req:['pp-experience'], v:35, get:'One hour of console or PC gaming, plus a free drink and snack.', hrs:'6am–9pm' },
   { a:'JFK', t:'Terminal 8', g:'C37', lvl:null,                 n:'Minute Suites',             k:'Nap suite', req:['pp-experience'], v:65, get:'One free hour in a private suite with a daybed. No showers here.', hrs:'Open 24 hours' },
-  { a:'JFK', t:'Terminal 8', g:'42',  lvl:'Level 3, one level up', n:'Admirals Club',          k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and showers.', hrs:'4:15am–10:30pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'JFK', t:'Terminal 8', g:'42',  lvl:'Level 3, one level up', n:'Admirals Club',          k:'Lounge',    req:['admirals','military-uniform'],      v:79, get:'Buffet, bar and showers.', hrs:'4:15am–10:30pm', flag:'Requires a same-day American or Oneworld flight.' },
   { a:'JFK', t:'Terminal 8', g:'12',  lvl:null,                 n:"Bobby Van's Steakhouse",    k:'Dining',    req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Sit-down steakhouse.', hrs:'Daily from 6am' },
 
   /* ---------------- LGA ---------------- */
   { a:'LGA', t:'Terminal B', g:'20',  lvl:'Ground floor',       n:'Chase Sapphire Lounge',     k:'Lounge',    req:['sapphire','pp-lounge'], v:100, get:'Two floors with a buffet, drink stations, phone booths and a retro arcade.', hrs:'4:30am–9:30pm' },
   { a:'LGA', t:'Terminal B', g:'20',  lvl:null,                 n:'Capital One Landing',       k:'Lounge',    req:['capone'],        v:90, get:'Full restaurant and bar on the bridge over gates 11–31.', hrs:'5am–10pm' },
   { a:'LGA', t:'Terminal B', g:'31',  lvl:null,                 n:'Centurion Lounge',          k:'Lounge',    req:['centurion'],     v:50, get:'Chef-designed menu and a full bar.', hrs:'5am–9pm, 8pm Sat' },
-  { a:'LGA', t:'Terminal B', g:'30',  lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and business seating.', hrs:'4:30am–9:30pm', flag:'Requires a same-day American or Oneworld flight.' },
-  { a:'LGA', t:'Terminal B', g:'45',  lvl:null,                 n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5am–8:30pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'LGA', t:'Terminal B', g:'30',  lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals','military-uniform'],      v:79, get:'Buffet, bar and business seating.', hrs:'4:30am–9:30pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'LGA', t:'Terminal B', g:'45',  lvl:null,                 n:'United Club',               k:'Lounge',    req:['united-club','military-uniform'],   v:59, get:'Snacks, bar and workspace.', hrs:'5am–8:30pm', flag:'Requires a same-day United or Star Alliance flight.' },
   { a:'LGA', t:'Terminal B', g:'40',  lvl:'Level 3',            n:'Air Canada Maple Leaf Lounge', k:'Lounge', req:['pp-lounge'],     v:50, get:'Hot food and a full bar.', hrs:'5:45am–7:30pm' },
   { a:'LGA', t:'Terminal B', g:null,  lvl:null,                 n:'Be Relax Spa',              k:'Spa',       req:['pp-experience'], v:45, get:'One free 30-minute massage treatment.', hrs:'8am–8pm' },
   { a:'LGA', t:'Terminal B', g:null,  lvl:'Level 4, outside security', n:'Minute Suites Express', k:'Nap suite', req:['pp-experience'], v:50, get:'One free hour in a private suite.', hrs:'Open 24 hours', flag:'Outside the secure area in the Bowery Bay Shops — you must reclear security to reach your gate.' },
   { a:'LGA', t:'Terminal C', g:null,  lvl:'Level 4, enter on level 3', n:'Delta Sky Club',     k:'Lounge',    req:['delta-sky'],     v:59, get:'Buffet, bar and a Sky Deck terrace.', hrs:'5am–9:30pm, 7:30pm Sat', flag:'Requires a same-day Delta flight.' },
 
   /* ---------------- EWR ---------------- */
-  { a:'EWR', t:'Terminal A', g:'A8',  lvl:'Mezzanine, one level up', n:'Admirals Club',        k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and workspace.', hrs:'4am–7:30pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'EWR', t:'Terminal A', g:'A8',  lvl:'Mezzanine, one level up', n:'Admirals Club',        k:'Lounge',    req:['admirals','military-uniform'],      v:79, get:'Buffet, bar and workspace.', hrs:'4am–7:30pm', flag:'Requires a same-day American or Oneworld flight.' },
   { a:'EWR', t:'Terminal A', g:'A8',  lvl:null,                 n:'Delta Sky Club',            k:'Lounge',    req:['delta-sky'],     v:59, get:'Buffet and bar.', hrs:'5am–8:15pm', flag:'Requires a same-day Delta flight.' },
-  { a:'EWR', t:'Terminal A', g:'A27', lvl:null,                 n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5am–10pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'EWR', t:'Terminal A', g:'A27', lvl:null,                 n:'United Club',               k:'Lounge',    req:['united-club','military-uniform'],   v:59, get:'Snacks, bar and workspace.', hrs:'5am–10pm', flag:'Requires a same-day United or Star Alliance flight.' },
   { a:'EWR', t:'Terminal A', g:'A7',  lvl:null,                 n:'Be Relax Spa',              k:'Spa',       req:['pp-experience'], v:40, get:'One free massage or oxygen treatment.', hrs:'6am–9pm' },
   { a:'EWR', t:'Terminal A', g:null,  lvl:null,                 n:'Centurion Lounge',          k:'Lounge',    req:['centurion'],     v:50, get:'Chef-designed menu and a full bar.', hrs:'Opening 2026', flag:'Announced but not open yet — listed so you know it is coming.' },
   { a:'EWR', t:'Terminal B', g:'B60', lvl:null,                 n:'Lufthansa Business Lounge', k:'Lounge',    req:['pp-lounge'],     v:50, get:'Hot buffet, full bar and showers.', hrs:'2:15pm–9:30pm' },
-  { a:'EWR', t:'Terminal C', g:'C74', lvl:null,                 n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5am–10pm', flag:'Requires a same-day United or Star Alliance flight.' },
-  { a:'EWR', t:'Terminal C', g:'C123',lvl:null,                 n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5am–10:30pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'EWR', t:'Terminal C', g:'C74', lvl:null,                 n:'United Club',               k:'Lounge',    req:['united-club','military-uniform'],   v:59, get:'Snacks, bar and workspace.', hrs:'5am–10pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'EWR', t:'Terminal C', g:'C123',lvl:null,                 n:'United Club',               k:'Lounge',    req:['united-club','military-uniform'],   v:59, get:'Snacks, bar and workspace.', hrs:'5am–10:30pm', flag:'Requires a same-day United or Star Alliance flight.' },
   { a:'EWR', t:'Terminal C', g:'C125',lvl:null,                 n:'Minute Suites',             k:'Nap suite', req:['pp-experience'], v:65, get:'One free hour in a private suite with a daybed.', hrs:'Open 24 hours' },
 
   /* ---------------- SFO ---------------- */
   { a:'SFO', t:'Terminal 1', g:'B4',  lvl:null,                 n:'The Club SFO',              k:'Lounge',    req:['pp-lounge'],     v:50, get:'Hot buffet, full bar and showers. The main Priority Pass lounge here.', hrs:'4:30am–11:30pm' },
   { a:'SFO', t:'Terminal 1', g:'B6',  lvl:null,                 n:'Alaska Lounge',             k:'Lounge',    req:['alaska'],        v:65, get:'Pancake machine, barista bar and local beer on tap.', hrs:'5am–midnight' },
-  { a:'SFO', t:'Terminal 1', g:'B13', lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and showers.', hrs:'4:30am–11:30pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'SFO', t:'Terminal 1', g:'B13', lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals','military-uniform'],      v:79, get:'Buffet, bar and showers.', hrs:'4:30am–11:30pm', flag:'Requires a same-day American or Oneworld flight.' },
   { a:'SFO', t:'Terminal 1', g:'C3',  lvl:null,                 n:'Delta Sky Club',            k:'Lounge',    req:['delta-sky'],     v:59, get:'Buffet and bar.', hrs:'4:30am–midnight', flag:'Requires a same-day Delta flight.' },
   { a:'SFO', t:'Terminal 2', g:'D12', lvl:null,                 n:'Centurion Lounge',          k:'Lounge',    req:['centurion'],     v:50, get:'Chef-designed menu and a full bar.', hrs:'5am–11pm', flag:'This is the temporary location — the permanent Terminal 3 lounge is closed for renovation until 2027.' },
   { a:'SFO', t:'Terminal 2', g:'D8',  lvl:null,                 n:'Lark Creek Grill',          k:'Dining',    req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Californian sit-down menu.', hrs:'Daily from 6am' },
-  { a:'SFO', t:'Terminal 3', g:'E4',  lvl:null,                 n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5am–11:30pm', flag:'Requires a same-day United or Star Alliance flight.' },
-  { a:'SFO', t:'Terminal 3', g:'F11', lvl:null,                 n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5am–11:30pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'SFO', t:'Terminal 3', g:'E4',  lvl:null,                 n:'United Club',               k:'Lounge',    req:['united-club','military-uniform'],   v:59, get:'Snacks, bar and workspace.', hrs:'5am–11:30pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'SFO', t:'Terminal 3', g:'F11', lvl:null,                 n:'United Club',               k:'Lounge',    req:['united-club','military-uniform'],   v:59, get:'Snacks, bar and workspace.', hrs:'5am–11:30pm', flag:'Requires a same-day United or Star Alliance flight.' },
   { a:'SFO', t:'Terminal 3', g:'E6',  lvl:null,                 n:'San Francisco Giants Clubhouse', k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Ballpark-themed bar and grill.', hrs:'Daily from 6am' },
   { a:'SFO', t:'Terminal 3', g:'F3',  lvl:null,                 n:'Yankee Pier',               k:'Dining',    req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Seafood and a raw bar.', hrs:'Daily from 6am' },
   { a:'SFO', t:'International Terminal A', g:'A3', lvl:'Level 4, two levels up', n:'Golden Gate Lounge', k:'Lounge', req:['pp-lounge'], v:50, get:'Hot buffet, bar and shower suites. The best Priority Pass option at SFO.', hrs:'7am–11:30pm' },
@@ -1288,17 +1355,17 @@ const PERKS = [
   { a:'SFO', t:'International Terminal A', g:'A1', lvl:'Level 4, two levels up', n:'Air India Maharaja Lounge', k:'Lounge', req:['pp-lounge'], v:45, get:'Indian buffet and bar.', hrs:'6am–11:55pm' },
   { a:'SFO', t:'International Terminal A', g:'A5', lvl:'Level 5, three levels up', n:'Virgin Atlantic Clubhouse', k:'Lounge', req:['pp-lounge'], v:75, get:'Cocktail bar and à la carte dining.', hrs:'9am–11:30pm' },
   { a:'SFO', t:'International Terminal G', g:'G3', lvl:null,     n:'Mustards Bar & Grill',      k:'Dining',    req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Napa Valley spin-off.', hrs:'Daily from 6am' },
-  { a:'SFO', t:'International Terminal G', g:'G6', lvl:null,     n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'7am–1:15am', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'SFO', t:'International Terminal G', g:'G6', lvl:null,     n:'United Club',               k:'Lounge',    req:['united-club','military-uniform'],   v:59, get:'Snacks, bar and workspace.', hrs:'7am–1:15am', flag:'Requires a same-day United or Star Alliance flight.' },
 
   /* ---------------- LAX ---------------- */
   { a:'LAX', t:'Terminal 1', g:'12',  lvl:'Level 3, one level up', n:'Be Relax Spa',           k:'Spa',       req:['pp-experience'], v:40, get:'One free massage or aromatherapy treatment.', hrs:'6am–10pm' },
   { a:'LAX', t:'Terminal 3', g:'30B', lvl:null,                 n:'Gameway',                   k:'Gaming',    req:['pp-experience'], v:35, get:'One hour on PS5, Xbox or PC — plus a free drink and a free full-size snack.', hrs:'5am–10pm' },
   { a:'LAX', t:'Terminal 3', g:'34',  lvl:'Level 3, one level up', n:'Delta Sky Club',         k:'Lounge',    req:['delta-sky'],     v:59, get:'Buffet, bar and an outdoor terrace.', hrs:'4:15am–12:30am', flag:'Requires a same-day Delta flight.' },
-  { a:'LAX', t:'Terminal 4', g:'42',  lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and showers.', hrs:'4:30am–1am', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'LAX', t:'Terminal 4', g:'42',  lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals','military-uniform'],      v:79, get:'Buffet, bar and showers.', hrs:'4:30am–1am', flag:'Requires a same-day American or Oneworld flight.' },
   { a:'LAX', t:'Terminal 6', g:'65',  lvl:null,                 n:'Gameway',                   k:'Gaming',    req:['pp-experience'], v:35, get:'One hour of console or PC gaming, plus a free drink and snack.', hrs:'6am–10pm' },
   { a:'LAX', t:'Terminal 6', g:'65A', lvl:null,                 n:'Air Canada Maple Leaf Lounge', k:'Lounge', req:['pp-lounge'],     v:50, get:'Hot food and a full bar. One of the few real lounges outside Tom Bradley.', hrs:'5am–10pm' },
   { a:'LAX', t:'Terminal 6', g:'64',  lvl:'Mezzanine, one level up', n:'Alaska Lounge',        k:'Lounge',    req:['alaska'],        v:65, get:'Pancake machine and barista bar.', hrs:'5am–11pm' },
-  { a:'LAX', t:'Terminal 7', g:'71A', lvl:'Level 3, one level up', n:'United Club',            k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'4:30am–11:45pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'LAX', t:'Terminal 7', g:'71A', lvl:'Level 3, one level up', n:'United Club',            k:'Lounge',    req:['united-club','military-uniform'],   v:59, get:'Snacks, bar and workspace.', hrs:'4:30am–11:45pm', flag:'Requires a same-day United or Star Alliance flight.' },
   { a:'LAX', t:'Tom Bradley International', g:'150', lvl:null,   n:'Centurion Lounge',          k:'Lounge',    req:['centurion'],     v:50, get:'Chef-designed menu and a full bar. Open to Amex cardholders on any airline.', hrs:'6am–10pm' },
   { a:'LAX', t:'Tom Bradley International', g:'150', lvl:'Level 4, two levels up', n:'Be Relax Spa', k:'Spa',  req:['pp-experience'], v:40, get:'One free massage or aromatherapy treatment.', hrs:'9am–9pm' },
   { a:'LAX', t:'Tom Bradley International', g:'155', lvl:'Level 6, four levels up', n:'Star Alliance Lounge', k:'Lounge', req:['pp-lounge'], v:60, get:'Hot buffet, full bar and an outdoor terrace over the airfield.', hrs:'8:30am–1am' },
@@ -1306,12 +1373,12 @@ const PERKS = [
   { a:'LAX', t:'Tom Bradley International', g:'148', lvl:null,   n:'Chase Sapphire Lounge',     k:'Lounge',    req:['sapphire'],      v:100, get:'Full restaurant, cocktail bar and wellness suites.', hrs:'Opening late 2026', flag:'Under construction — not open yet. Listed so you know it is coming.' },
 
   /* ---------------- DFW ---------------- */
-  { a:'DFW', t:'Terminal A', g:'A24', lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and showers.', hrs:'4am–10:15pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'DFW', t:'Terminal A', g:'A24', lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals','military-uniform'],      v:79, get:'Buffet, bar and showers.', hrs:'4am–10:15pm', flag:'Requires a same-day American or Oneworld flight.' },
   { a:'DFW', t:'Terminal A', g:'A38', lvl:null,                 n:'Minute Suites',             k:'Nap suite', req:['pp-experience'], v:65, get:'One free hour in a private suite with a daybed.', hrs:'Open 24 hours' },
   { a:'DFW', t:'Terminal B', g:'B42', lvl:null,                 n:'Gameway',                   k:'Gaming',    req:['pp-experience'], v:35, get:'One hour on PS5, Xbox or PC — plus a free drink and a free full-size snack.', hrs:'6am–9pm' },
   { a:'DFW', t:'Terminal B', g:'B28', lvl:null,                 n:'Be Relax Spa',              k:'Spa',       req:['pp-experience'], v:40, get:'One free treatment, once per same-day boarding pass.', hrs:'8am–10pm' },
-  { a:'DFW', t:'Terminal B', g:'B3',  lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and showers.', hrs:'5:30am–10:15pm', flag:'Requires a same-day American or Oneworld flight.' },
-  { a:'DFW', t:'Terminal C', g:'C20', lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and showers.', hrs:'5am–10:15pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'DFW', t:'Terminal B', g:'B3',  lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals','military-uniform'],      v:79, get:'Buffet, bar and showers.', hrs:'5:30am–10:15pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'DFW', t:'Terminal C', g:'C20', lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals','military-uniform'],      v:79, get:'Buffet, bar and showers.', hrs:'5am–10:15pm', flag:'Requires a same-day American or Oneworld flight.' },
   { a:'DFW', t:'Terminal D', g:'D22', lvl:null,                 n:'Capital One Lounge',        k:'Lounge',    req:['capone'],        v:90, get:'Full restaurant, grab-and-go wall, showers and a wellness room.', hrs:'5am–10pm' },
   { a:'DFW', t:'Terminal D', g:'D12', lvl:null,                 n:'Centurion Lounge',          k:'Lounge',    req:['centurion'],     v:50, get:'Chef-designed menu and a full bar.', hrs:'5:30am–10pm' },
   { a:'DFW', t:'Terminal D', g:'D25', lvl:null,                 n:'Chase Sapphire Lounge',     k:'Lounge',    req:['sapphire','pp-lounge'], v:100, get:'Full restaurant, cocktail bar and wellness suites.', hrs:'5am–10pm', flag:'Priority Pass members get one visit a year here — Sapphire cardholders get unlimited access.' },
@@ -1320,38 +1387,38 @@ const PERKS = [
   { a:'DFW', t:'Terminal D', g:'D15', lvl:null,                 n:'Plaza Premium First',       k:'Lounge',    req:['pp-lounge'],     v:65, get:'The upgraded sibling — à la carte dining and private suites.', hrs:'7am–10pm' },
   { a:'DFW', t:'Terminal D', g:'D21', lvl:null,                 n:'Be Relax Spa',              k:'Spa',       req:['pp-experience'], v:40, get:'One free massage or aromatherapy treatment.', hrs:'8am–10pm' },
   { a:'DFW', t:'Terminal D', g:'D23', lvl:null,                 n:'Minute Suites',             k:'Nap suite', req:['pp-experience'], v:65, get:'One free hour in a private suite with a daybed.', hrs:'Open 24 hours' },
-  { a:'DFW', t:'Terminal D', g:'D24', lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and showers.', hrs:'5am–10:15pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'DFW', t:'Terminal D', g:'D24', lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals','military-uniform'],      v:79, get:'Buffet, bar and showers.', hrs:'5am–10:15pm', flag:'Requires a same-day American or Oneworld flight.' },
   { a:'DFW', t:'Terminal E', g:'E16', lvl:null,                 n:'Gameway',                   k:'Gaming',    req:['pp-experience'], v:35, get:'One hour of console or PC gaming, plus a free drink and snack.', hrs:'5am–8pm' },
   { a:'DFW', t:'Terminal E', g:'E10', lvl:null,                 n:'Delta Sky Club',            k:'Lounge',    req:['delta-sky'],     v:59, get:'Buffet and bar.', hrs:'4:15am–7pm', flag:'Requires a same-day Delta flight.' },
-  { a:'DFW', t:'Terminal E', g:'E6',  lvl:null,                 n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'4:30am–7:45pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'DFW', t:'Terminal E', g:'E6',  lvl:null,                 n:'United Club',               k:'Lounge',    req:['united-club','military-uniform'],   v:59, get:'Snacks, bar and workspace.', hrs:'4:30am–7:45pm', flag:'Requires a same-day United or Star Alliance flight.' },
   { a:'DFW', t:'Terminal E', g:'E31', lvl:null,                 n:'Plaza Premium Lounge',      k:'Lounge',    req:['pp-lounge'],     v:55, get:'Hot buffet and bar.', hrs:'6am–8pm', flag:'Two-hour maximum stay for Priority Pass members.' },
-  { a:'DFW', t:'Terminal E', g:'E15', lvl:'Mezzanine, one level up', n:'Admirals Club',        k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and showers.', hrs:'6am–10:15pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'DFW', t:'Terminal E', g:'E15', lvl:'Mezzanine, one level up', n:'Admirals Club',        k:'Lounge',    req:['admirals','military-uniform'],      v:79, get:'Buffet, bar and showers.', hrs:'6am–10:15pm', flag:'Requires a same-day American or Oneworld flight.' },
 
   /* ---------------- DEN ---------------- */
   { a:'DEN', t:'Concourse A', g:'A34', lvl:'Mezzanine, one level up', n:'Capital One Lounge',  k:'Lounge',    req:['capone'],        v:90, get:'Full restaurant, grab-and-go wall, showers and a wellness room.', hrs:'5am–9pm' },
   { a:'DEN', t:'Concourse A', g:'A38', lvl:'Level 4, two levels up', n:'Delta Sky Club',       k:'Lounge',    req:['delta-sky'],     v:59, get:'Buffet, bar and an outdoor sky deck.', hrs:'4:30am–12:15am', flag:'Requires a same-day Delta flight.' },
-  { a:'DEN', t:'Concourse A', g:'A25', lvl:null,                n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5am–8:30pm', flag:'Requires a same-day United or Star Alliance flight.' },
-  { a:'DEN', t:'Concourse B', g:'B32', lvl:null,                n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5:30am–9pm', flag:'Requires a same-day United or Star Alliance flight.' },
-  { a:'DEN', t:'Concourse B', g:'B44', lvl:null,                n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5:30am–9pm', flag:'Requires a same-day United or Star Alliance flight.' },
-  { a:'DEN', t:'Concourse B', g:'B60', lvl:null,                n:'United Club Fly',           k:'Lounge',    req:['united-club'],   v:45, get:'A smaller grab-and-go club. No guests permitted.', hrs:'7am–7pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'DEN', t:'Concourse A', g:'A25', lvl:null,                n:'United Club',               k:'Lounge',    req:['united-club','military-uniform'],   v:59, get:'Snacks, bar and workspace.', hrs:'5am–8:30pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'DEN', t:'Concourse B', g:'B32', lvl:null,                n:'United Club',               k:'Lounge',    req:['united-club','military-uniform'],   v:59, get:'Snacks, bar and workspace.', hrs:'5:30am–9pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'DEN', t:'Concourse B', g:'B44', lvl:null,                n:'United Club',               k:'Lounge',    req:['united-club','military-uniform'],   v:59, get:'Snacks, bar and workspace.', hrs:'5:30am–9pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'DEN', t:'Concourse B', g:'B60', lvl:null,                n:'United Club Fly',           k:'Lounge',    req:['united-club','military-uniform'],   v:45, get:'A smaller grab-and-go club. No guests permitted.', hrs:'7am–7pm', flag:'Requires a same-day United or Star Alliance flight.' },
   { a:'DEN', t:'Concourse C', g:'C46', lvl:'Mezzanine, one level up', n:'Centurion Lounge',    k:'Lounge',    req:['centurion'],     v:50, get:'Chef-designed menu and a full bar.', hrs:'5am–10pm' },
-  { a:'DEN', t:'Concourse C', g:'C32', lvl:'Mezzanine, one level up', n:'Admirals Club',       k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and workspace.', hrs:'4:30am–11:30pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'DEN', t:'Concourse C', g:'C32', lvl:'Mezzanine, one level up', n:'Admirals Club',       k:'Lounge',    req:['admirals','military-uniform'],      v:79, get:'Buffet, bar and workspace.', hrs:'4:30am–11:30pm', flag:'Requires a same-day American or Oneworld flight.' },
 
   /* ---------------- PHX ---------------- */
   { a:'PHX', t:'Terminal 4', g:'D11', lvl:null,                 n:'Chase Sapphire Lounge',     k:'Lounge',    req:['sapphire','pp-lounge'], v:100, get:'An Airstream food truck, full-service bar and an indoor terrace.', hrs:'4:30am–10:30pm' },
   { a:'PHX', t:'Terminal 4', g:'B22', lvl:'Upper level, one level up', n:'Centurion Lounge',   k:'Lounge',    req:['centurion'],     v:50, get:'Chef-designed menu and a full bar.', hrs:'6am–9pm' },
   { a:'PHX', t:'Terminal 4', g:'B22', lvl:null,                 n:'Escape Lounge',             k:'Lounge',    req:['pp-lounge','centurion'], v:45, get:'Hot food, bar and quiet seating.', hrs:'5am–10pm' },
-  { a:'PHX', t:'Terminal 4', g:'A7',  lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and showers.', hrs:'5:30am–11:30pm', flag:'Requires a same-day American or Oneworld flight.' },
-  { a:'PHX', t:'Terminal 4', g:'A19', lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and workspace.', hrs:'3:30am–9pm', flag:'Requires a same-day American or Oneworld flight.' },
-  { a:'PHX', t:'Terminal 4', g:'B5',  lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and workspace.', hrs:'5:30am–9pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'PHX', t:'Terminal 4', g:'A7',  lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals','military-uniform'],      v:79, get:'Buffet, bar and showers.', hrs:'5:30am–11:30pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'PHX', t:'Terminal 4', g:'A19', lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals','military-uniform'],      v:79, get:'Buffet, bar and workspace.', hrs:'3:30am–9pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'PHX', t:'Terminal 4', g:'B5',  lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals','military-uniform'],      v:79, get:'Buffet, bar and workspace.', hrs:'5:30am–9pm', flag:'Requires a same-day American or Oneworld flight.' },
   { a:'PHX', t:'Terminal 3', g:'E5',  lvl:null,                 n:'Escape Lounge',             k:'Lounge',    req:['pp-lounge','centurion'], v:45, get:'Hot food, bar and quiet seating.', hrs:'4:30am–10pm' },
   { a:'PHX', t:'Terminal 3', g:'F8',  lvl:null,                 n:'Delta Sky Club',            k:'Lounge',    req:['delta-sky'],     v:59, get:'Buffet and bar.', hrs:'4:45am–11:15pm', flag:'Requires a same-day Delta flight.' },
-  { a:'PHX', t:'Terminal 3', g:'E3',  lvl:null,                 n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5am–11pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'PHX', t:'Terminal 3', g:'E3',  lvl:null,                 n:'United Club',               k:'Lounge',    req:['united-club','military-uniform'],   v:59, get:'Snacks, bar and workspace.', hrs:'5am–11pm', flag:'Requires a same-day United or Star Alliance flight.' },
 
   /* ---------------- MIA ---------------- */
   { a:'MIA', t:'Concourse D', g:'D12', lvl:'Level 4, two levels up', n:'Centurion Lounge',     k:'Lounge',    req:['centurion'],     v:50, get:'Chef-designed menu and a full bar.', hrs:'5am–10pm' },
-  { a:'MIA', t:'Concourse D', g:'D15', lvl:null,                n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and showers.', hrs:'5:30am–10:30pm', flag:'Requires a same-day American or Oneworld flight.' },
-  { a:'MIA', t:'Concourse D', g:'D30', lvl:null,                n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and showers.', hrs:'5am–10:30pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'MIA', t:'Concourse D', g:'D15', lvl:null,                n:'Admirals Club',             k:'Lounge',    req:['admirals','military-uniform'],      v:79, get:'Buffet, bar and showers.', hrs:'5:30am–10:30pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'MIA', t:'Concourse D', g:'D30', lvl:null,                n:'Admirals Club',             k:'Lounge',    req:['admirals','military-uniform'],      v:79, get:'Buffet, bar and showers.', hrs:'5am–10:30pm', flag:'Requires a same-day American or Oneworld flight.' },
   { a:'MIA', t:'Concourse D', g:'D11', lvl:null,                n:'XpresSpa',                  k:'Spa',       req:['pp-experience'], v:30, get:'25 free minutes in a massage chair or on wellness equipment.', hrs:'8am–8pm' },
   { a:'MIA', t:'Concourse E', g:'E20', lvl:'Level 2',           n:'Turkish Airlines Lounge',   k:'Lounge',    req:['pp-lounge'],     v:55, get:'Carved meats, a bakery and a full bar.', hrs:'5am–10pm', flag:'Three-hour maximum stay. Members must be 21 or over.' },
   { a:'MIA', t:'Concourse H', g:'H10', lvl:'Level 3, one level up', n:'Turkish Airlines Lounge', k:'Lounge',  req:['pp-lounge'],     v:55, get:'Carved meats, a bakery and a full bar.', hrs:'Open 24 hours', flag:'Three-hour maximum stay.' },
@@ -1360,23 +1427,23 @@ const PERKS = [
 
   /* ---------------- PHL ---------------- */
   { a:'PHL', t:'Terminal A', g:'A14', lvl:null,                 n:'Centurion Lounge',          k:'Lounge',    req:['centurion'],     v:50, get:'Full bar, day beds, showers and a family room.', hrs:'5:30am–9pm' },
-  { a:'PHL', t:'Terminal A', g:'A15', lvl:'Mezzanine, one level up', n:'Admirals Club',        k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, full bar and showers.', hrs:'5am–10pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'PHL', t:'Terminal A', g:'A15', lvl:'Mezzanine, one level up', n:'Admirals Club',        k:'Lounge',    req:['admirals','military-uniform'],      v:79, get:'Buffet, full bar and showers.', hrs:'5am–10pm', flag:'Requires a same-day American or Oneworld flight.' },
   { a:'PHL', t:'Terminal B', g:'B2',  lvl:null,                 n:'XpresSpa',                  k:'Spa',       req:['pp-experience'], v:30, get:'Free access to a zero-gravity massage chair or body lounger.', hrs:'7am–9pm' },
   { a:'PHL', t:'Terminal B', g:'B10', lvl:null,                 n:'Minute Suites',             k:'Nap suite', req:['pp-experience'], v:65, get:'One free hour in a private suite with a daybed. Showers available.', hrs:'Open 24 hours' },
-  { a:'PHL', t:'Terminal B', g:'B14', lvl:'Level 3, two levels up', n:'Admirals Club',         k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and workspace.', hrs:'4:30am–10pm', flag:'In the B/C connector. Requires a same-day American or Oneworld flight.' },
-  { a:'PHL', t:'Terminal C', g:'C20', lvl:'Level 2, one level up', n:'United Club',            k:'Lounge',    req:['united-club'],   v:59, get:'Bar, coffee station and snacks.', hrs:'5am–6pm', flag:'In the C/D connector. Requires a same-day United or Star Alliance flight.' },
+  { a:'PHL', t:'Terminal B', g:'B14', lvl:'Level 3, two levels up', n:'Admirals Club',         k:'Lounge',    req:['admirals','military-uniform'],      v:79, get:'Buffet, bar and workspace.', hrs:'4:30am–10pm', flag:'In the B/C connector. Requires a same-day American or Oneworld flight.' },
+  { a:'PHL', t:'Terminal C', g:'C20', lvl:'Level 2, one level up', n:'United Club',            k:'Lounge',    req:['united-club','military-uniform'],   v:59, get:'Bar, coffee station and snacks.', hrs:'5am–6pm', flag:'In the C/D connector. Requires a same-day United or Star Alliance flight.' },
   { a:'PHL', t:'Terminal D/E', g:'D5', lvl:'Level 2, one level up', n:'Chase Sapphire Lounge', k:'Lounge',    req:['sapphire'],      v:100, get:'Curated dining, wellness pods, a game room and a beer garden.', hrs:'5am–10pm' },
   { a:'PHL', t:'Terminal D/E', g:'D5', lvl:'Level 2, one level up', n:'Delta Sky Club',        k:'Lounge',    req:['delta-sky'],     v:59, get:'Self-serve bar and buffet.', hrs:'4:30am–6:30pm', flag:'Requires a same-day Delta flight.' },
-  { a:'PHL', t:'Terminal F', g:'F14', lvl:'Level 2, one level up', n:'Admirals Club',          k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and workspace.', hrs:'6:30am–9pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'PHL', t:'Terminal F', g:'F14', lvl:'Level 2, one level up', n:'Admirals Club',          k:'Lounge',    req:['admirals','military-uniform'],      v:79, get:'Buffet, bar and workspace.', hrs:'6:30am–9pm', flag:'Requires a same-day American or Oneworld flight.' },
 
   /* ---------------- DCA ---------------- */
   { a:'DCA', t:'Concourse B', g:'B15', lvl:'Level 2, one level up', n:'Centurion Lounge',      k:'Lounge',    req:['centurion'],     v:50, get:'Chef-designed menu and a full bar.', hrs:'6am–9pm, 5am–7pm Sat' },
   { a:'DCA', t:'Concourse B', g:'B15', lvl:'One level up',      n:'Delta Sky Club',            k:'Lounge',    req:['delta-sky'],     v:59, get:'Buffet, bar and a rooftop terrace.', hrs:'5am–9:30pm, 7pm Sat', flag:'Requires a same-day Delta flight.' },
-  { a:'DCA', t:'Concourse B', g:'B11', lvl:null,                n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5:30am–7:30pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'DCA', t:'Concourse B', g:'B11', lvl:null,                n:'United Club',               k:'Lounge',    req:['united-club','military-uniform'],   v:59, get:'Snacks, bar and workspace.', hrs:'5:30am–7:30pm', flag:'Requires a same-day United or Star Alliance flight.' },
   { a:'DCA', t:'Concourse D', g:'D22', lvl:null,                n:'Capital One Landing',       k:'Lounge',    req:['capone'],        v:90, get:'A José Andrés-designed menu, full bar and grab-and-go wall.', hrs:'6am–9pm' },
-  { a:'DCA', t:'Concourse C', g:'C24', lvl:null,                n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and workspace.', hrs:'4:15am–10:15pm', flag:'Requires a same-day American or Oneworld flight.' },
-  { a:'DCA', t:'Concourse D', g:'D36', lvl:null,                n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and workspace.', hrs:'4:15am–8:15pm', flag:'Requires a same-day American or Oneworld flight.' },
-  { a:'DCA', t:'Concourse E', g:'E46', lvl:null,                n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and workspace. The best of the three at DCA.', hrs:'4:15am–10:15pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'DCA', t:'Concourse C', g:'C24', lvl:null,                n:'Admirals Club',             k:'Lounge',    req:['admirals','military-uniform'],      v:79, get:'Buffet, bar and workspace.', hrs:'4:15am–10:15pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'DCA', t:'Concourse D', g:'D36', lvl:null,                n:'Admirals Club',             k:'Lounge',    req:['admirals','military-uniform'],      v:79, get:'Buffet, bar and workspace.', hrs:'4:15am–8:15pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'DCA', t:'Concourse E', g:'E46', lvl:null,                n:'Admirals Club',             k:'Lounge',    req:['admirals','military-uniform'],      v:79, get:'Buffet, bar and workspace. The best of the three at DCA.', hrs:'4:15am–10:15pm', flag:'Requires a same-day American or Oneworld flight.' },
 
   /* ---------------- IAD ---------------- */
   { a:'IAD', t:'Main Terminal', g:null, lvl:'Just past the checkpoint', n:'Capital One Lounge', k:'Lounge',   req:['capone'],        v:90, get:'Full restaurant, grab-and-go wall, showers and a wellness room.', hrs:'5:30am–9pm' },
@@ -1385,22 +1452,157 @@ const PERKS = [
   { a:'IAD', t:'Terminal A', g:'A32', lvl:null,                 n:'Virgin Atlantic Clubhouse', k:'Lounge',    req:['pp-lounge','centurion'], v:75, get:'Cocktail bar, à la carte dining and showers.', hrs:'Opens 4 hours before Virgin departures' },
   { a:'IAD', t:'Concourse B', g:'B43', lvl:null,                n:'Turkish Airlines Lounge',   k:'Lounge',    req:['pp-lounge'],     v:55, get:'Carved meats, a bakery and a full bar. One of the best lounges in the US.', hrs:'7:15am–9:15pm' },
   { a:'IAD', t:'Concourse B', g:'B50', lvl:null,                n:'British Airways Galleries', k:'Lounge',    req:['pp-lounge'],     v:50, get:'Hot and cold buffet, wine and coffee.', hrs:'2:30pm–10:30pm' },
-  { a:'IAD', t:'Concourse C', g:'C7',  lvl:null,                n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5:30am–10pm', flag:'Requires a same-day United or Star Alliance flight.' },
-  { a:'IAD', t:'Concourse C', g:'C17', lvl:null,                n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5:30am–10pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'IAD', t:'Concourse C', g:'C7',  lvl:null,                n:'United Club',               k:'Lounge',    req:['united-club','military-uniform'],   v:59, get:'Snacks, bar and workspace.', hrs:'5:30am–10pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'IAD', t:'Concourse C', g:'C17', lvl:null,                n:'United Club',               k:'Lounge',    req:['united-club','military-uniform'],   v:59, get:'Snacks, bar and workspace.', hrs:'5:30am–10pm', flag:'Requires a same-day United or Star Alliance flight.' },
   { a:'IAD', t:'Concourse C', g:'C14', lvl:null,                n:"Chef Geoff's",              k:'Dining',    req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. American sit-down menu.', hrs:'Daily from 7am' },
-  { a:'IAD', t:'Concourse D', g:'D8',  lvl:null,                n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5:30am–10pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'IAD', t:'Concourse D', g:'D8',  lvl:null,                n:'United Club',               k:'Lounge',    req:['united-club','military-uniform'],   v:59, get:'Snacks, bar and workspace.', hrs:'5:30am–10pm', flag:'Requires a same-day United or Star Alliance flight.' },
   { a:'IAD', t:'Concourse E', g:'E9',  lvl:null,                n:'Gameway',                   k:'Gaming',    req:['pp-experience'], v:35, get:'One hour of console or PC gaming, plus a free drink and snack.', hrs:'Opening soon', flag:'Announced for Concourse E — confirm it has opened before you count on it.' },
 
-  /* ---------------- USO (requires a DoD ID) ---------------- */
-  { a:'SFO', t:'Terminal 1', g:'20', lvl:'Mezzanine, one level up', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Free food, drinks, Wi-Fi and quiet seating.', hrs:'7am–8pm' },
-  { a:'DFW', t:'Terminal B', g:'B47', lvl:null,                     n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Free food, drinks, Wi-Fi and quiet seating.', hrs:'8am–10:30pm' },
-  { a:'DEN', t:'Concourse A', g:null, lvl:'Level 4, two levels up', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Free food, drinks, Wi-Fi and quiet seating.', hrs:'7am–7pm' },
-  { a:'PHL', t:'Terminal D/E', g:'E2', lvl:null,                    n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Free food, drinks, Wi-Fi, gaming and a children’s room.', hrs:'6am–6pm' },
-  { a:'LAX', t:'Terminal 1', g:null, lvl:'Landside, outside security', n:'Bob Hope Hollywood USO', k:'Military', req:['military'], v:50, get:'Free food, drinks, Wi-Fi, showers and bunk rooms.', hrs:'7am–9pm', flag:'On the arrivals level between Terminals 1 and 2, outside security — you would have to re-screen afterwards.' },
-  { a:'PHX', t:'Terminal 4', g:null, lvl:'Landside, outside security', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Free food, drinks, Wi-Fi and quiet seating.', hrs:'7am–7pm', flag:'On level 2 outside security — you would have to re-screen afterwards.' },
-  { a:'DCA', t:'Concourse B', g:null, lvl:'Landside, outside security', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Free food, drinks, Wi-Fi and quiet seating.', hrs:'6am–6pm', flag:'In Terminal 1 outside security — you would have to re-screen afterwards.' },
-  { a:'IAD', t:'Main Terminal', g:null, lvl:'Arrivals level, outside security', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Free food, drinks, Wi-Fi, family areas and sleeping quarters.', hrs:'Varies — check the USO app', flag:'On the arrivals level outside security — you would have to re-screen afterwards.' },
-  { a:'JFK', t:'Terminal 5', g:null, lvl:'Landside, outside security', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Free food, drinks, Wi-Fi and quiet seating.', hrs:'9am–2pm', flag:'Temporarily closed. Sits outside security across from baggage carousel 3.' }
+  /* ---------------- Military ---------------- */
+  { a:'MIA', t:'Concourse E', g:'E20', lvl:'Level 2', elig:'Active duty, retired, Reserve and Guard, plus all honorably-discharged veterans and their families. Broader than the USO.', n:'Military Hospitality Lounge', k:'Military', req:['military'], v:50, get:'Free snacks, drinks, Wi-Fi and quiet seating, run independently of the USO.', hrs:'9am–5pm' },
+  { a:'SFO', t:'Terminal 1', g:'20', lvl:'Mezzanine, one level up', elig:'Active duty, Reserve, Guard, retirees and dependents with a DoD ID. Veterans without a DoD ID are not admitted.', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Free food, drinks, Wi-Fi and quiet seating.', hrs:'7am–8pm' },
+  { a:'DFW', t:'Terminal B', g:'B47', lvl:null,                     elig:'Active duty, Reserve, Guard, retirees and dependents with a DoD ID. Veterans without a DoD ID are not admitted.', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Free food, drinks, Wi-Fi and quiet seating.', hrs:'8am–10:30pm' },
+  { a:'DEN', t:'Concourse A', g:null, lvl:'Level 4, two levels up', elig:'Active duty, Reserve, Guard, retirees and dependents with a DoD ID. Veterans without a DoD ID are not admitted.', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Free food, drinks, Wi-Fi and quiet seating.', hrs:'7am–7pm' },
+  { a:'PHL', t:'Terminal D/E', g:'E2', lvl:null,                    elig:'Active duty, Reserve, Guard, retirees and dependents with a DoD ID. Veterans without a DoD ID are not admitted.', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Free food, drinks, Wi-Fi, gaming and a children’s room.', hrs:'6am–6pm' },
+  { a:'LAX', t:'Terminal 1', g:null, lvl:'Landside, outside security', elig:'Active duty, Reserve, Guard, retirees and dependents with a DoD ID. Veterans without a DoD ID are not admitted.', n:'Bob Hope Hollywood USO', k:'Military', req:['military'], v:50, get:'Free food, drinks, Wi-Fi, showers and bunk rooms.', hrs:'7am–9pm', flag:'On the arrivals level between Terminals 1 and 2, outside security — you would have to re-screen afterwards.' },
+  { a:'PHX', t:'Terminal 4', g:null, lvl:'Landside, outside security', elig:'Active duty, Reserve, Guard, retirees and dependents with a DoD ID. Veterans without a DoD ID are not admitted.', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Free food, drinks, Wi-Fi and quiet seating.', hrs:'7am–7pm', flag:'On level 2 outside security — you would have to re-screen afterwards.' },
+  { a:'DCA', t:'Concourse B', g:null, lvl:'Landside, outside security', elig:'Active duty, Reserve, Guard, retirees and dependents with a DoD ID. Veterans without a DoD ID are not admitted.', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Free food, drinks, Wi-Fi and quiet seating.', hrs:'6am–6pm', flag:'In Terminal 1 outside security — you would have to re-screen afterwards.' },
+  { a:'IAD', t:'Main Terminal', g:null, lvl:'Arrivals level, outside security', elig:'Active duty, Reserve, Guard, retirees and dependents with a DoD ID. Veterans without a DoD ID are not admitted.', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Free food, drinks, Wi-Fi, family areas and sleeping quarters.', hrs:'Varies — check the USO app', flag:'On the arrivals level outside security — you would have to re-screen afterwards.' },
+  { a:'JFK', t:'Terminal 5', g:null, lvl:'Landside, outside security', elig:'Active duty, Reserve, Guard, retirees and dependents with a DoD ID. Veterans without a DoD ID are not admitted.', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Free food, drinks, Wi-Fi and quiet seating.', hrs:'9am–2pm', flag:'Temporarily closed. Sits outside security across from baggage carousel 3.' },
+  /* ---------------- ATL ---------------- */
+  { a:'ATL', t:'Concourse E', g:'E11', lvl:null, n:'Centurion Lounge', k:'Lounge', req:['centurion'], v:50, get:'Locally inspired menu by chef Deborah VanTrece, a whiskey bar and showers.', hrs:'6am–11pm' },
+  { a:'ATL', t:'Concourse F', g:null, lvl:'Mezzanine, one level up', n:'The Club ATL', k:'Lounge', req:['pp-lounge'], v:50, get:'Bar, hot meals, showers and workstations.', hrs:'6am–10pm' },
+  { a:'ATL', t:'Concourse T', g:'T11', lvl:null, n:'Admirals Club', k:'Lounge', req:['admirals','military-uniform'], v:79, get:'Buffet, bar and workspace.', hrs:'4:30am–7:45pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'ATL', t:'Concourse T', g:'T11', lvl:'Mezzanine, one level up', n:'United Club', k:'Lounge', req:['united-club','military-uniform'], v:59, get:'Snacks, bar and workspace.', hrs:'5am–7pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'ATL', t:'Concourse A', g:null, lvl:null, n:'Delta Sky Club', k:'Lounge', req:['delta-sky'], v:59, get:'Buffet and bar.', hrs:'5:30am–10:30pm', flag:'Requires a same-day Delta flight. Delta runs clubs in most concourses at ATL.' },
+  { a:'ATL', t:'Concourse D', g:null, lvl:null, n:'Delta Sky Club', k:'Lounge', req:['delta-sky'], v:59, get:'The largest club at ATL at 24,000 sq ft, opened 2025.', hrs:'5:30am–10:30pm', flag:'Requires a same-day Delta flight.' },
+  { a:'ATL', t:'Concourse F', g:null, lvl:null, n:'Delta Sky Club', k:'Lounge', req:['delta-sky'], v:59, get:'Buffet, bar and showers.', hrs:'5:30am–10:30pm', flag:'Requires a same-day Delta flight.' },
+  { a:'ATL', t:'Concourse B', g:'B24', lvl:null, n:'Minute Suites', k:'Nap suite', req:['pp-experience'], v:65, get:'One free hour in a private suite with a daybed.', hrs:'Open 24 hours' },
+  { a:'ATL', t:'Concourse E', g:null, lvl:null, n:'Minute Suites', k:'Nap suite', req:['pp-experience'], v:65, get:'One free hour in a private suite. In the centre atrium.', hrs:'Open 24 hours' },
+  { a:'ATL', t:'Concourse F', g:'F6', lvl:null, n:'Minute Suites', k:'Nap suite', req:['pp-experience'], v:65, get:'One free hour in a private suite with a daybed.', hrs:'Open 24 hours' },
+  { a:'ATL', t:'Concourse B', g:'B22', lvl:null, n:'Be Relax Spa', k:'Spa', req:['pp-experience'], v:40, get:'One free massage, nail service or aromatherapy treatment.', hrs:'7am–10pm' },
+  { a:'ATL', t:'Concourse A', g:null, lvl:null, n:'XpresSpa', k:'Spa', req:['pp-experience'], v:30, get:'25 free minutes in a massage chair or on wellness equipment.', hrs:'6am–10pm' },
+  { a:'ATL', t:'Concourse D', g:null, lvl:null, n:'XpresSpa', k:'Spa', req:['pp-experience'], v:30, get:'25 free minutes in a massage chair or on wellness equipment.', hrs:'6am–10pm' },
+  { a:'ATL', t:'Concourse T', g:null, lvl:'Third floor, outside security', elig:'Active duty, Reserve, Guard and immediate families with a DoD ID. Veterans without a DoD ID are not admitted.', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Snacks, Wi-Fi, charging and TV.', hrs:'8am–8pm', flag:'In the domestic terminal atrium outside security — you would have to re-screen afterwards.' },
+
+  /* ---------------- ORD ---------------- */
+  { a:'ORD', t:'Terminal 5', g:'M17', lvl:null, n:'Air France Lounge', k:'Lounge', req:['pp-lounge'], v:50, get:'Buffet, bar and showers.', hrs:'5:30am–11:30pm' },
+  { a:'ORD', t:'Terminal 5', g:'M13', lvl:null, n:'Swissport Lounge', k:'Lounge', req:['pp-lounge'], v:45, get:'Hot food and a bar. Three-hour limit.', hrs:'7am–12am' },
+  { a:'ORD', t:'Terminal 5', g:'M14', lvl:null, n:'Delta Sky Club', k:'Lounge', req:['delta-sky'], v:59, get:'Buffet and bar.', hrs:'4:30am–8pm', flag:'Requires a same-day Delta flight.' },
+  { a:'ORD', t:'Terminal 3', g:'G8', lvl:null, n:'Admirals Club', k:'Lounge', req:['admirals','military-uniform'], v:79, get:'Buffet, bar and showers.', hrs:'5am–11pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'ORD', t:'Terminal 3', g:'H6', lvl:null, n:'Admirals Club', k:'Lounge', req:['admirals','military-uniform'], v:79, get:'Buffet, bar and workspace.', hrs:'5am–11pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'ORD', t:'Terminal 1', g:'B6', lvl:null, n:'United Club', k:'Lounge', req:['united-club','military-uniform'], v:59, get:'Snacks, bar and workspace.', hrs:'4:30am–11pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'ORD', t:'Terminal 1', g:'C10', lvl:null, n:'United Club', k:'Lounge', req:['united-club','military-uniform'], v:59, get:'Snacks, bar and workspace.', hrs:'4:30am–11pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'ORD', t:'Terminal 2', g:'E7', lvl:null, n:'United Club', k:'Lounge', req:['united-club','military-uniform'], v:59, get:'Snacks, bar and workspace.', hrs:'4:30am–11pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'ORD', t:'Terminal 2', g:null, lvl:'Mezzanine, outside security', elig:'Active duty, Reserve, Guard, retirees and dependents with a DoD ID. Veterans without a DoD ID are not admitted.', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Snacks, drinks, Wi-Fi and quiet seating.', hrs:'9am–9pm', flag:'Outside security — you would have to re-screen afterwards.' },
+  { a:'ORD', t:'Terminal 3', g:null, lvl:'Concourse G mezzanine', elig:'Active duty, Reserve, Guard, retirees and dependents with a DoD ID. Veterans without a DoD ID are not admitted.', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Snacks, drinks, Wi-Fi and quiet seating.', hrs:'9am–5pm' },
+
+  /* ---------------- CLT ---------------- */
+  { a:'CLT', t:'Concourse D', g:null, lvl:'Mezzanine, one level up', n:'Centurion Lounge', k:'Lounge', req:['centurion'], v:50, get:'Chef-designed menu and a full bar.', hrs:'5:30am–10:30pm' },
+  { a:'CLT', t:'Concourse A', g:'A21', lvl:null, n:'The Club CLT', k:'Lounge', req:['pp-lounge'], v:50, get:'Buffet, bar and showers.', hrs:'5am–9:30pm' },
+  { a:'CLT', t:'Concourse A', g:'A32', lvl:'Mezzanine, one level up', n:'Delta Sky Club', k:'Lounge', req:['delta-sky'], v:59, get:'Buffet and bar.', hrs:'5am–8pm', flag:'Requires a same-day Delta flight.' },
+  { a:'CLT', t:'Concourse B', g:'B3', lvl:null, n:'Admirals Club', k:'Lounge', req:['admirals','military-uniform'], v:79, get:'Buffet, bar and showers.', hrs:'4:15am–10:45pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'CLT', t:'Concourse C', g:null, lvl:null, n:'Admirals Club', k:'Lounge', req:['admirals','military-uniform'], v:79, get:'Buffet, bar and workspace. In the C/D connector.', hrs:'5:15am–10:45pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'CLT', t:'Concourse A', g:'A1', lvl:null, n:'Provisions by Admirals Club', k:'Lounge', req:['admirals'], v:45, get:'A smaller grab-and-go club.', hrs:'6:15am–9:15pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'CLT', t:'Concourse E', g:'E36', lvl:null, n:'Gameway', k:'Gaming', req:['pp-experience'], v:35, get:'One hour on PS5, Xbox or PC — plus a free drink and a free full-size snack.', hrs:'7am–8pm' },
+  { a:'CLT', t:'Concourse A', g:null, lvl:null, n:'Be Relax Spa', k:'Spa', req:['pp-experience'], v:40, get:'One free treatment per visit.', hrs:'9am–8pm' },
+  { a:'CLT', t:'Concourse D', g:'D1', lvl:null, n:'Minute Suites', k:'Nap suite', req:['pp-experience'], v:65, get:'One free hour in a private suite with a daybed.', hrs:'Open 24 hours' },
+  { a:'CLT', t:'Main Terminal', g:null, lvl:'Atrium', n:'Minute Suites', k:'Nap suite', req:['pp-experience'], v:65, get:'One free hour in a private suite with a daybed.', hrs:'Open 24 hours' },
+  { a:'CLT', t:'Main Terminal', g:null, lvl:'Atrium, second floor', elig:'Active duty, Reserve, Guard, retirees and dependents with a DoD ID. Veterans without a DoD ID are not admitted.', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Snacks, drinks, Wi-Fi and quiet seating.', hrs:'6am–6pm' },
+
+  /* ---------------- SEA ---------------- */
+  { a:'SEA', t:'Central Terminal', g:null, lvl:'Mezzanine, one level up', n:'Centurion Lounge', k:'Lounge', req:['centurion'], v:50, get:'Chef-designed menu and a full bar.', hrs:'5am–10pm' },
+  { a:'SEA', t:'Concourse A', g:'A12', lvl:null, n:'The Club SEA', k:'Lounge', req:['pp-lounge'], v:50, get:'Hot food, bar and showers.', hrs:'5am–midnight' },
+  { a:'SEA', t:'South Satellite', g:'S9', lvl:null, n:'The Club SEA', k:'Lounge', req:['pp-lounge'], v:50, get:'Hot food and a bar.', hrs:'6am–midnight' },
+  { a:'SEA', t:'Concourse C', g:'C16', lvl:null, n:'Alaska Lounge', k:'Lounge', req:['alaska'], v:65, get:'Pancake machine, barista bar and local beer on tap.', hrs:'5am–7pm' },
+  { a:'SEA', t:'Concourse D', g:'D1', lvl:null, n:'Alaska Lounge', k:'Lounge', req:['alaska'], v:65, get:'Pancake machine and barista bar.', hrs:'5am–11pm' },
+  { a:'SEA', t:'North Satellite', g:'N15', lvl:'Mezzanine, one level up', n:'Alaska Lounge', k:'Lounge', req:['alaska'], v:65, get:'Pancake machine, barista bar and airfield views.', hrs:'5am–11pm' },
+  { a:'SEA', t:'Concourse A', g:'A1', lvl:null, n:'Delta Sky Club', k:'Lounge', req:['delta-sky'], v:59, get:'Buffet and bar.', hrs:'4:15am–11:15pm', flag:'Requires a same-day Delta flight.' },
+  { a:'SEA', t:'Concourse A', g:'A11', lvl:null, n:'Delta Sky Club', k:'Lounge', req:['delta-sky'], v:59, get:'Buffet, bar and airfield views.', hrs:'5am–10:30pm', flag:'Requires a same-day Delta flight.' },
+  { a:'SEA', t:'Central Terminal', g:null, lvl:'Mezzanine above Checkpoint 3', elig:'Active duty, Reserve, Guard, retirees and dependents with a DoD ID. Veterans without a DoD ID are not admitted.', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Snacks, drinks, Wi-Fi and quiet seating.', hrs:'6am–10pm' },
+
+  /* ---------------- BOS ---------------- */
+  { a:'BOS', t:'Terminal B', g:'B39', lvl:null, n:'Chase Sapphire Lounge', k:'Lounge', req:['sapphire'], v:100, get:'Full restaurant, cocktail bar and wellness rooms.', hrs:'5am–11pm' },
+  { a:'BOS', t:'Terminal B', g:'B4', lvl:'Upper level, one level up', n:'Admirals Club', k:'Lounge', req:['admirals','military-uniform'], v:79, get:'Buffet, bar and workspace.', hrs:'4am–8:30pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'BOS', t:'Terminal B', g:'B24', lvl:null, n:'United Club', k:'Lounge', req:['united-club','military-uniform'], v:59, get:'Snacks, bar and workspace.', hrs:'4:30am–8:30pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'BOS', t:'Terminal B', g:'B24', lvl:null, n:"Stephanie's", k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Sit-down American menu.', hrs:'Daily from 6am' },
+  { a:'BOS', t:'Terminal C', g:'C19', lvl:null, n:'The Lounge', k:'Lounge', req:['pp-lounge'], v:50, get:'Hot food, bar and quiet seating.', hrs:'6am–9pm' },
+  { a:'BOS', t:'Terminal C', g:'C25', lvl:null, n:"Davio's Northern Italian Steakhouse", k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Sit-down steakhouse.', hrs:'Daily from 6am' },
+  { a:'BOS', t:'Terminal C', g:null, lvl:'Landside, outside security', elig:'Active duty with a valid military ID. Veterans without a DoD ID are not admitted.', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Snacks, drinks, Wi-Fi and quiet seating.', hrs:'8am–6pm', flag:'Near baggage claim outside security — you would have to re-screen afterwards.' },
+  { a:'BOS', t:'Terminal A', g:'A6', lvl:null, n:'Delta Sky Club', k:'Lounge', req:['delta-sky'], v:59, get:'Buffet and bar.', hrs:'4:30am–9:30pm', flag:'Requires a same-day Delta flight.' },
+  { a:'BOS', t:'Terminal A', g:'A18', lvl:null, n:'Delta Sky Club', k:'Lounge', req:['delta-sky'], v:59, get:'Buffet and bar.', hrs:'4:30am–8pm', flag:'Requires a same-day Delta flight.' },
+  { a:'BOS', t:'Terminal E', g:'E13', lvl:null, n:'Delta Sky Club', k:'Lounge', req:['delta-sky'], v:59, get:'Buffet, bar and showers.', hrs:'5am–1am', flag:'Requires a same-day Delta flight.' },
+  { a:'BOS', t:'Terminal E', g:'E11', lvl:null, n:'Lufthansa Lounge', k:'Lounge', req:['pp-lounge'], v:50, get:'Hot buffet, full bar and showers.', hrs:'12:15pm–9:30pm' },
+
+  /* ---------------- IAH ---------------- */
+  { a:'IAH', t:'Terminal D', g:'D12', lvl:'Mezzanine, one level up', n:'Centurion Lounge', k:'Lounge', req:['centurion'], v:50, get:'Chef-designed menu and a full bar.', hrs:'6am–9:30pm' },
+  { a:'IAH', t:'Terminal D', g:'D15', lvl:null, n:'KLM Crown Lounge', k:'Lounge', req:['pp-lounge'], v:50, get:'Hot buffet and bar. Three-hour maximum stay.', hrs:'6am–9pm' },
+  { a:'IAH', t:'Terminal D', g:'D18', lvl:null, n:'Air France Lounge', k:'Lounge', req:['pp-lounge'], v:50, get:'Buffet and bar. Three-hour maximum stay.', hrs:'12pm–5pm' },
+  { a:'IAH', t:'Terminal D', g:'D1', lvl:null, n:'Be Relax Spa', k:'Spa', req:['pp-experience'], v:40, get:'One free massage or aromatherapy treatment.', hrs:'8am–8pm' },
+  { a:'IAH', t:'Terminal C', g:'C14', lvl:null, n:'Minute Suites', k:'Nap suite', req:['pp-experience'], v:65, get:'One free hour in a private suite with a daybed.', hrs:'Open 24 hours' },
+  { a:'IAH', t:'Terminal A', g:'A25', lvl:null, n:'Admirals Club', k:'Lounge', req:['admirals','military-uniform'], v:79, get:'Buffet, bar and workspace.', hrs:'4:15am–7:45pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'IAH', t:'Terminal A', g:'A9', lvl:null, n:'United Club', k:'Lounge', req:['united-club','military-uniform'], v:59, get:'Snacks, bar and workspace.', hrs:'5:30am–9pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'IAH', t:'Terminal C', g:'C33', lvl:null, n:'United Club', k:'Lounge', req:['united-club','military-uniform'], v:59, get:'Snacks, bar and workspace.', hrs:'5:30am–9pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'IAH', t:'Terminal E', g:'E11', lvl:null, n:'United Club', k:'Lounge', req:['united-club','military-uniform'], v:59, get:'Snacks, bar and workspace.', hrs:'5:30am–9pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'IAH', t:'Terminal D', g:'D8', lvl:null, elig:'Active duty, Reserve, Guard, retirees and dependents with a DoD ID. Veterans without a DoD ID are not admitted.', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Snacks, drinks, Wi-Fi and quiet seating.', hrs:'6am–9pm' },
+
+  /* ---------------- MSP ---------------- */
+  { a:'MSP', t:'Concourse E', g:null, lvl:null, n:'Escape Lounge', k:'Lounge', req:['pp-lounge','centurion','delta-sky'], v:45, get:'Hot food, bar and quiet seating. Just before the Concourse E entrance.', hrs:'4am–9pm', flag:'Free for Amex Platinum and Delta Reserve holders travelling on Delta that day, and for Priority Pass members.' },
+  { a:'MSP', t:'Concourse C', g:null, lvl:null, n:'PGA MSP', k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Golf-themed bar and grill with simulators.', hrs:'6am–9pm' },
+  { a:'MSP', t:'Concourse G', g:'G18', lvl:null, n:'Delta Sky Club', k:'Lounge', req:['delta-sky'], v:59, get:'The newest and largest club at MSP. Reached via the South checkpoint.', hrs:'5am–9pm', flag:'Requires a same-day Delta flight.' },
+  { a:'MSP', t:'Concourse F', g:null, lvl:null, n:'Delta Sky Club', k:'Lounge', req:['delta-sky'], v:59, get:'Buffet and bar in the F/G connector.', hrs:'5am–9pm', flag:'Requires a same-day Delta flight.' },
+  { a:'MSP', t:'Concourse E', g:'E6', lvl:null, n:'United Club', k:'Lounge', req:['united-club','military-uniform'], v:59, get:'Snacks, bar and workspace.', hrs:'5am–8pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'MSP', t:'Concourse C', g:null, lvl:'Transit Center mezzanine', elig:'Active duty, Guard, Reserve, retirees, dependents, DoD staff, former POWs, Purple Heart and Medal of Honor recipients, and 100% disabled veterans. Broader than the USO.', n:'Armed Forces Service Center', k:'Military', req:['military'], v:50, get:'Free food, drinks, bunk rooms and showers, staffed by volunteers around the clock.', hrs:'Open 24 hours' },
+
+  /* ---------------- DTW ---------------- */
+  { a:'DTW', t:'McNamara Terminal', g:'A17', lvl:null, n:'Gameway', k:'Gaming', req:['pp-experience'], v:35, get:'One hour on PS5, Xbox or PC — plus a free drink and a free full-size snack.', hrs:'7am–9pm' },
+  { a:'DTW', t:'McNamara Terminal', g:'A63', lvl:null, n:'Gameway', k:'Gaming', req:['pp-experience'], v:35, get:'One hour of console or PC gaming, plus a free drink and snack.', hrs:'7am–9pm' },
+  { a:'DTW', t:'McNamara Terminal', g:'A43', lvl:null, n:'Be Relax Spa', k:'Spa', req:['pp-experience'], v:40, get:'One free massage or aromatherapy treatment.', hrs:'7am–9pm' },
+  { a:'DTW', t:'McNamara Terminal', g:'A66', lvl:null, n:'Minute Suites', k:'Nap suite', req:['pp-experience'], v:65, get:'One free hour in a private suite with a daybed.', hrs:'Open 24 hours' },
+  { a:'DTW', t:'McNamara Terminal', g:'A38', lvl:null, n:'Delta Sky Club', k:'Lounge', req:['delta-sky'], v:59, get:'Buffet and bar.', hrs:'4:15am–10:30pm', flag:'Requires a same-day Delta flight.' },
+  { a:'DTW', t:'McNamara Terminal', g:'A18', lvl:'Level 2, one level up', n:'Delta Sky Club', k:'Lounge', req:['delta-sky'], v:59, get:'Buffet and bar.', hrs:'6am–9pm', flag:'Requires a same-day Delta flight.' },
+  { a:'DTW', t:'McNamara Terminal', g:'A68', lvl:'Level 2, one level up', n:'Delta Sky Club', k:'Lounge', req:['delta-sky'], v:59, get:'Buffet and bar.', hrs:'6am–9pm', flag:'Requires a same-day Delta flight.' },
+  { a:'DTW', t:'McNamara Terminal', g:'A43', lvl:null, elig:'Active military, retirees, veterans and dependents — no DoD ID required. Broader than the USO.', n:'Freedom Center', k:'Military', req:['military'], v:50, get:'Free snacks, drinks, Wi-Fi and quiet seating, staffed by volunteers.', hrs:'Varies with volunteer staffing' },
+  { a:'DTW', t:'Evans Terminal', g:'D17', lvl:null, elig:'Active military, retirees, veterans and dependents — no DoD ID required. Broader than the USO.', n:'Freedom Center', k:'Military', req:['military'], v:50, get:'Free snacks, drinks, Wi-Fi and quiet seating, staffed by volunteers.', hrs:'Varies with volunteer staffing' },
+  { a:'DTW', t:'Evans Terminal', g:'D6', lvl:null, n:'Lufthansa Business Lounge', k:'Lounge', req:['pp-lounge'], v:50, get:'Hot food and artwork celebrating Detroit’s car industry. Three-hour maximum stay.', hrs:'6am–9pm' },
+
+  /* ---------------- LAS ---------------- */
+  { a:'LAS', t:'Concourse D', g:'D1', lvl:null, n:'Centurion Lounge', k:'Lounge', req:['centurion'], v:50, get:'Self-serve hot and cold buffet, full bar and showers.', hrs:'5am–11pm' },
+  { a:'LAS', t:'Concourse D', g:null, lvl:null, n:'Sidecar by The Centurion Lounge', k:'Lounge', req:['centurion'], v:50, get:'Restaurant-style dining with made-to-order hot dishes.', hrs:'8am–10pm' },
+  { a:'LAS', t:'Concourse D', g:'D50', lvl:'Level 2, one level up', n:'Capital One Lounge', k:'Lounge', req:['capone'], v:90, get:'Full-service espresso bar, hot food and a drink cart.', hrs:'5am–11pm' },
+  { a:'LAS', t:'Concourse C', g:'C23', lvl:null, n:'Chase Sapphire Lounge', k:'Lounge', req:['sapphire'], v:100, get:'Made-to-order dining by Momofuku and full bar service.', hrs:'4:30am–11pm' },
+  { a:'LAS', t:'Concourse D', g:'D33', lvl:'Level 2, one level up', n:'The Club LAS', k:'Lounge', req:['pp-lounge'], v:50, get:'Hot food, bar and quiet seating.', hrs:'5am–11:30pm' },
+  { a:'LAS', t:'Concourse E', g:'E2', lvl:null, n:'The Club LAS', k:'Lounge', req:['pp-lounge'], v:50, get:'Hot food, bar and quiet seating.', hrs:'5am–12am' },
+  { a:'LAS', t:'Concourse D', g:'D33', lvl:null, n:'United Club', k:'Lounge', req:['united-club','military-uniform'], v:59, get:'Snacks, bar and workspace.', hrs:'4:30am–11pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'LAS', t:'Concourse D', g:'D32', lvl:null, n:'XpresSpa', k:'Spa', req:['pp-experience'], v:30, get:'25 free minutes in a massage chair or on wellness equipment.', hrs:'7am–10pm' },
+  { a:'LAS', t:'Concourse E', g:'E3', lvl:null, n:'XpresSpa', k:'Spa', req:['pp-experience'], v:30, get:'25 free minutes in a massage chair or on wellness equipment.', hrs:'9am–10pm' },
+  { a:'LAS', t:'Concourse B', g:null, lvl:'Landside, outside security', elig:'Active duty, Guard, Reserve, retirees and dependents with a DoD ID. Veterans without a DoD ID are not admitted.', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Snacks, drinks, Wi-Fi and quiet seating.', hrs:'4am–8pm', flag:'By the A and B checkpoints, outside security — you would have to re-screen afterwards.' },
+
+  /* ---------------- MCO ---------------- */
+  { a:'MCO', t:'Terminal A', g:null, lvl:null, n:'The Club MCO', k:'Lounge', req:['pp-lounge'], v:50, get:'Hot food, bar and showers. In Concourse 1 by XpresSpa.', hrs:'5am–10pm' },
+  { a:'MCO', t:'Terminal B', g:'91', lvl:null, n:'The Club MCO', k:'Lounge', req:['pp-lounge'], v:50, get:'Hot food, bar and quiet seating.', hrs:'5am–9pm' },
+  { a:'MCO', t:'Terminal C', g:null, lvl:'Palm Court, second level', n:'Plaza Premium Lounge', k:'Lounge', req:['pp-lounge','plaza-premium'], v:55, get:'Hot buffet, bar and showers.', hrs:'7am–9pm' },
+  { a:'MCO', t:'Terminal B', g:'55', lvl:null, n:'Admirals Club', k:'Lounge', req:['admirals','military-uniform'], v:79, get:'Buffet, bar and workspace.', hrs:'4:30am–8:45pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'MCO', t:'Terminal B', g:'71', lvl:null, n:'Delta Sky Club', k:'Lounge', req:['delta-sky'], v:59, get:'Buffet and bar.', hrs:'4:30am–9:15pm', flag:'Requires a same-day Delta flight.' },
+  { a:'MCO', t:'Terminal B', g:'43', lvl:null, n:'United Club', k:'Lounge', req:['united-club','military-uniform'], v:59, get:'Snacks, bar and workspace.', hrs:'5am–8pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'MCO', t:'Terminal A', g:null, lvl:null, n:'XpresSpa', k:'Spa', req:['pp-experience'], v:30, get:'25 free minutes in a massage chair or on wellness equipment.', hrs:'7am–9pm' },
+  { a:'MCO', t:'Terminal B', g:null, lvl:null, n:'XpresSpa', k:'Spa', req:['pp-experience'], v:30, get:'25 free minutes in a massage chair or on wellness equipment.', hrs:'7am–9pm' },
+  { a:'MCO', t:'Terminal A', g:null, lvl:'Level 1, outside security', elig:'Active duty, Reserve, Guard, retirees and dependents with a DoD ID. Veterans without a DoD ID are not admitted.', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Snacks, drinks, Wi-Fi and quiet seating.', hrs:'8am–8pm', flag:'Landside — you would have to re-screen afterwards.' },
+
+  /* ---------------- Priority Pass restaurants ---------------- */
+  { a:'ATL', t:'Concourse B', g:null, lvl:null, n:'Samuel Adams Brew House', k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Pub food and a long beer list.', hrs:'Daily from 7am' },
+  { a:'DCA', t:'Concourse C', g:null, lvl:null, n:'American Tap Room', k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Sit-down American menu.', hrs:'Daily from 6am' },
+  { a:'DCA', t:'Concourse B', g:null, lvl:null, n:'Bracket Room', k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Sports bar and grill.', hrs:'Daily from 6am' },
+  { a:'DEN', t:'Concourse A', g:null, lvl:null, n:'Mercantile Dining & Provisions', k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Farm-to-table Denver spin-off.', hrs:'Daily from 6am' },
+  { a:'DEN', t:'Concourse B', g:null, lvl:null, n:'SweetWater Mountain Taphouse', k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Colorado taphouse and grill.', hrs:'Daily from 6am' },
+  { a:'DFW', t:'Terminal E', g:null, lvl:null, n:"Drew Pearson's Sport 88", k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Sports bar and grill.', hrs:'Daily from 6am' },
+  { a:'DTW', t:'Evans Terminal', g:null, lvl:null, n:"Anita's Kitchen", k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Lebanese and Mediterranean menu.', hrs:'Daily from 6am' },
+  { a:'IAH', t:'Terminal A', g:null, lvl:null, n:'Cadillac Mexican Kitchen & Tequila Bar', k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Tex-Mex and a tequila list.', hrs:'Daily from 6am' },
+  { a:'IAH', t:'Terminal C', g:null, lvl:null, n:"Landry's Seafood", k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Sit-down seafood.', hrs:'Daily from 6am' },
+  { a:'SEA', t:'North Satellite', g:null, lvl:null, n:'Bambuza Vietnam Kitchen', k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Vietnamese noodles and banh mi.', hrs:'Daily from 6am' },
+  { a:'SEA', t:'Central Terminal', g:null, lvl:null, n:'Ninth & Pike Artisan Kitchen', k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Pike Place-inspired market kitchen.', hrs:'Daily from 6am' },
+  { a:'MIA', t:'Concourse D', g:null, lvl:null, n:'Corona Beach House', k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Open-air bar and grill.', hrs:'Daily from 7am' }
+
 ];
 
 /* ============================ STATE ============================ */
@@ -1444,7 +1646,7 @@ function gateNum(g) {
 function heldPrograms() {
   const set = new Set();
   CARDS.filter(c => state.cards.includes(c.id)).forEach(c => c.grants.forEach(p => set.add(p)));
-  if (state.dod) set.add('military');
+  if (state.dod) { set.add('military'); set.add('military-uniform'); }
   return set;
 }
 
@@ -1649,11 +1851,16 @@ function renderContext() {
 function renderMilitaryNote() {
   const el = document.getElementById('milNote');
   if (!state.dod) { el.innerHTML = ''; return; }
+
   const airline = airlineFromFlight(leg().flight);
   const rule = airline && MILITARY_AIRLINE[airline];
-  el.innerHTML = rule
-    ? `<b>${esc(airline)} military baggage:</b> ${esc(rule)}`
-    : `<b>Airline benefits:</b> most US carriers allow 2&ndash;5 free checked bags on orders and early boarding with a military ID. Add a flight number above for your airline's specific rule.`;
+
+  el.innerHTML = `
+    <b>TSA PreCheck is free for uniformed service members</b> &mdash; no application and no fee. Put the 10-digit DoD ID number from the back of your CAC in the Known Traveler Number field when you book, on official and personal travel alike. You have to opt in once at ID Card Office Online first.<br><br>`
+    + (rule
+        ? `<b>${esc(airline)} military baggage:</b> ${esc(rule)}`
+        : `<b>Airline baggage:</b> most US carriers allow 2&ndash;5 free checked bags on orders and early boarding with a military ID. Add a flight number above for your airline's exact rule.`)
+    + `<br><br><b>Shops and restaurants:</b> we deliberately don't list these. Airport outlets of chains are run by concessionaires, not the brand, so a company's published military discount usually doesn't apply and policy varies store to store. Airports sometimes run their own terminal-wide programme &mdash; O'Hare's ran to April 2026 and has not been renewed &mdash; so the reliable move is simply to ask at the counter.`;
 }
 
 
@@ -1669,9 +1876,11 @@ function renderTerminalPicker(airport) {
   if (!leg().flight) document.getElementById('flightHint').textContent = '';
 }
 
+/* One card list, rendered into every wallet on the page, so the copy in "Plan
+   ahead" and the copy in "At the airport" are the same selection. */
 function renderWallet() {
   const issuers = [...new Set(CARDS.map(c => c.issuer))];
-  document.getElementById('walletBody').innerHTML = issuers.map(iss => `
+  const body = issuers.map(iss => `
     <div class="issuer-group">
       <div class="issuer-name">${esc(iss)}</div>
       ${CARDS.filter(c => c.issuer === iss).map(c => `
@@ -1679,10 +1888,15 @@ function renderWallet() {
           <input type="checkbox" data-card="${c.id}"${state.cards.includes(c.id) ? ' checked' : ''}>
           <span>${esc(c.name)}</span>
         </label>`).join('')}
-    </div>`).join('');
+    </div>`).join('')
+    + '<button type="button" class="wallet-done" data-done>Done</button>';
+
+  document.querySelectorAll('[data-wallet-body]').forEach(el => { el.innerHTML = body; });
 
   const n = state.cards.length;
-  document.getElementById('walletCount').textContent = n === 1 ? '1 selected' : `${n} selected`;
+  const label = n === 1 ? '1 selected' : `${n} selected`;
+  document.querySelectorAll('[data-wallet-count]').forEach(el => { el.textContent = label; });
+
   document.getElementById('dod').checked = !!state.dod;
 }
 
@@ -1787,6 +2001,24 @@ function perkRow(p, isHere, myGate, held) {
   const rule = first ? guestRule(first.card, first.program) : null;
   const guestLine = rule ? `<div class="guests"><span>Guests</span> ${esc(rule)}</div>` : '';
 
+  // Access earned by service rather than by a card carries its own conditions.
+  const milVia = p.req.find(r => r.startsWith('military') && held.has(r));
+  let milLine = '';
+  if (milVia && !first) {
+    const uniform = milVia === 'military-uniform'
+      ? Object.keys(UNIFORM_RULES).find(k => p.n.includes(k))
+      : null;
+    const text = uniform ? UNIFORM_RULES[uniform] : p.elig;
+    milLine = `<div class="via">Via <b>${esc(PROGRAMS[milVia])}</b></div>`
+      + (text ? `<div class="guests"><span>Who</span> ${esc(text)}</div>` : '');
+  } else if (milVia && first) {
+    // Already open via a card; note the service route only where it adds something.
+    const uniform = Object.keys(UNIFORM_RULES).find(k => p.n.includes(k));
+    if (milVia === 'military-uniform' && uniform) {
+      milLine = `<div class="guests"><span>Also</span> ${esc(UNIFORM_RULES[uniform])}</div>`;
+    }
+  }
+
   const st = openStatus(p);
   const badge = st ? `<span class="badge is-${st.state}">${esc(st.label)}</span>` : '';
 
@@ -1804,6 +2036,7 @@ function perkRow(p, isHere, myGate, held) {
           <span>${esc(p.hrs)}</span>
         </div>
         ${viaLine}
+        ${milLine}
         ${guestLine}
         ${p.flag ? `<div class="flag">${esc(p.flag)}</div>` : ''}
       </div>
@@ -2141,7 +2374,8 @@ document.getElementById('gate').addEventListener('input', e => {
   save();
 });
 
-document.getElementById('walletBody').addEventListener('change', e => {
+/* Delegated so both wallets share one handler and one selection. */
+document.addEventListener('change', e => {
   const box = e.target.closest('[data-card]');
   if (!box) return;
   const id = box.dataset.card;
@@ -2149,9 +2383,18 @@ document.getElementById('walletBody').addEventListener('change', e => {
     ? [...new Set([...state.cards, id])]
     : state.cards.filter(c => c !== id);
 
-  const open = document.getElementById('wallet').open;
+  const wallets = [...document.querySelectorAll('.wallet')];
+  const open = wallets.map(w => w.open);
   render();
-  document.getElementById('wallet').open = open;
+  [...document.querySelectorAll('.wallet')].forEach((w, i) => { w.open = open[i]; });
+});
+
+document.addEventListener('click', e => {
+  const done = e.target.closest('[data-done]');
+  if (!done) return;
+  const panel = done.closest('.wallet');
+  panel.open = false;
+  panel.querySelector('summary').scrollIntoView({ block: 'nearest' });
 });
 
 document.getElementById('trip').addEventListener('click', e => {
