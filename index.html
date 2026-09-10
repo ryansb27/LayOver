@@ -5,10 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Every perk your credit cards actually unlock at 22 US airports — lounges, gaming, spas, dining credits — sorted by how far it is from your gate.">
 <meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#16202B">
 <meta property="og:title" content="Layover">
 <meta property="og:description" content="Every perk your credit cards actually unlock at this airport, sorted by how far it is from your gate.">
 <meta property="og:type" content="website">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%F0%9F%9B%AB</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='9' fill='%2316202B'/><path d='M12 46 L24 34' stroke='%23FFFFFF' stroke-width='3' stroke-linecap='round'/><path d='M40 34 L52 46' stroke='%23FFFFFF' stroke-width='3' stroke-linecap='round'/><circle cx='12' cy='46' r='2.5' fill='%23FFFFFF'/><circle cx='52' cy='46' r='2.5' fill='%23FFFFFF'/><circle cx='32' cy='28' r='12' fill='%23E9A322'/><circle cx='32' cy='28' r='4.5' fill='%2316202B'/></svg>">
 <style>
   *, *::before, *::after { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
@@ -140,6 +141,16 @@
     justify-content: space-between;
     gap: 12px;
     flex-wrap: wrap;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+  }
+  .mark {
+    width: 60px;
+    height: 44px;
+    flex: none;
   }
   .wordmark {
     font-family: Archivo, ui-sans-serif, system-ui, sans-serif;
@@ -915,7 +926,17 @@
 
   <header class="masthead">
     <div class="masthead-top">
-      <h1 class="wordmark">Layo<em>ver</em></h1>
+      <div class="brand">
+        <svg class="mark" viewBox="0 0 88 64" role="img" aria-label="Layover">
+          <path d="M6 48 L34 30" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 7"/>
+          <path d="M54 30 L82 48" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 7"/>
+          <circle cx="6" cy="48" r="4" fill="#FFFFFF"/>
+          <circle cx="82" cy="48" r="4" fill="#FFFFFF"/>
+          <circle cx="44" cy="26" r="13" fill="var(--accent-fill)"/>
+          <circle cx="44" cy="26" r="5" fill="var(--board)"/>
+        </svg>
+        <h1 class="wordmark">Lay<em>over</em></h1>
+      </div>
       <span class="stamp">22 airports &middot; Verified Sep 2026</span>
     </div>
     <p>Every perk your cards actually unlock at this airport &mdash; lounges, gaming, spa treatments, dining credits &mdash; sorted by how far it is from your gate.</p>
