@@ -786,7 +786,9 @@
     flex-direction: column;
     gap: 16px;
   }
-  .home-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .home-row { display: flex; flex-direction: column; gap: 14px; }
+  .home-group { display: flex; flex-direction: column; gap: 7px; }
+  .home-chips { display: flex; gap: 8px; flex-wrap: wrap; }
   .home {
     font-family: Archivo, sans-serif;
     font-weight: 700;
@@ -1236,78 +1238,78 @@ const INCOME_BANDS = [
    is uncertain we split the group — being told to reclear when you needn't is a
    wasted opportunity; the reverse can cost you the flight. */
 const AIRPORTS = {
-  JFK: { city:'New York — Kennedy',  tz:'America/New_York', terminals:['Terminal 1','Terminal 4','Terminal 5','Terminal 8'],
+  JFK: { region:'North America', city:'New York — Kennedy',  tz:'America/New_York', terminals:['Terminal 1','Terminal 4','Terminal 5','Terminal 8'],
          airside:[['Terminal 1'],['Terminal 4'],['Terminal 5'],['Terminal 8']] },
-  LGA: { city:'New York — LaGuardia',tz:'America/New_York', terminals:['Terminal B','Terminal C'],
+  LGA: { region:'North America', city:'New York — LaGuardia',tz:'America/New_York', terminals:['Terminal B','Terminal C'],
          airside:[['Terminal B'],['Terminal C']] },
-  EWR: { city:'Newark',              tz:'America/New_York', terminals:['Terminal A','Terminal B','Terminal C'],
+  EWR: { region:'North America', city:'Newark',              tz:'America/New_York', terminals:['Terminal A','Terminal B','Terminal C'],
          airside:[['Terminal A'],['Terminal B'],['Terminal C']],
          note:'A secure-area shuttle links Terminals A and C for Star Alliance connecting passengers only — everyone else has to exit and re-screen.' },
-  SFO: { city:'San Francisco',       tz:'America/Los_Angeles', terminals:['Terminal 1','Terminal 2','Terminal 3','International Terminal A','International Terminal G'],
+  SFO: { region:'North America', city:'San Francisco',       tz:'America/Los_Angeles', terminals:['Terminal 1','Terminal 2','Terminal 3','International Terminal A','International Terminal G'],
          airside:[['Terminal 1','Terminal 2','Terminal 3','International Terminal A','International Terminal G']] },
-  LAX: { city:'Los Angeles',         tz:'America/Los_Angeles', terminals:['Terminal 1','Terminal 3','Terminal 4','Terminal 6','Terminal 7','Tom Bradley International'],
+  LAX: { region:'North America', city:'Los Angeles',         tz:'America/Los_Angeles', terminals:['Terminal 1','Terminal 3','Terminal 4','Terminal 6','Terminal 7','Tom Bradley International'],
          airside:[['Terminal 4','Terminal 6','Terminal 7','Tom Bradley International'],['Terminal 1'],['Terminal 3']] },
-  DFW: { city:'Dallas–Fort Worth',   tz:'America/Chicago', terminals:['Terminal A','Terminal B','Terminal C','Terminal D','Terminal E'],
+  DFW: { region:'North America', city:'Dallas–Fort Worth',   tz:'America/Chicago', terminals:['Terminal A','Terminal B','Terminal C','Terminal D','Terminal E'],
          airside:[['Terminal A','Terminal B','Terminal C','Terminal D','Terminal E']] },
-  DEN: { city:'Denver',              tz:'America/Denver', terminals:['Concourse A','Concourse B','Concourse C'],
+  DEN: { region:'North America', city:'Denver',              tz:'America/Denver', terminals:['Concourse A','Concourse B','Concourse C'],
          airside:[['Concourse A','Concourse B','Concourse C']],
          note:'Denver has no Priority Pass lounges — card lounge access here means Capital One, Centurion or an airline club. Two Priority Pass restaurants do participate.' },
-  PHX: { city:'Phoenix',             tz:'America/Phoenix', terminals:['Terminal 3','Terminal 4'],
+  PHX: { region:'North America', city:'Phoenix',             tz:'America/Phoenix', terminals:['Terminal 3','Terminal 4'],
          airside:[['Terminal 3'],['Terminal 4']] },
-  MIA: { city:'Miami',               tz:'America/New_York', terminals:['Concourse D','Concourse E','Concourse H','Concourse J'],
+  MIA: { region:'North America', city:'Miami',               tz:'America/New_York', terminals:['Concourse D','Concourse E','Concourse H','Concourse J'],
          airside:[['Concourse D','Concourse E','Concourse H','Concourse J']] },
-  PHL: { city:'Philadelphia',        tz:'America/New_York', terminals:['Terminal A','Terminal B','Terminal C','Terminal D/E','Terminal F'],
+  PHL: { region:'North America', city:'Philadelphia',        tz:'America/New_York', terminals:['Terminal A','Terminal B','Terminal C','Terminal D/E','Terminal F'],
          airside:[['Terminal A','Terminal B','Terminal C','Terminal D/E','Terminal F']] },
-  DCA: { city:'Washington — Reagan', tz:'America/New_York', terminals:['Concourse B','Concourse C','Concourse D','Concourse E'],
+  DCA: { region:'North America', city:'Washington — Reagan', tz:'America/New_York', terminals:['Concourse B','Concourse C','Concourse D','Concourse E'],
          airside:[['Concourse B','Concourse C','Concourse D','Concourse E']],
          note:'Reagan National has no Priority Pass lounges — card lounge access means Capital One, Amex or an airline club. Two Priority Pass restaurants do participate.' },
-  IAD: { city:'Washington — Dulles', tz:'America/New_York', terminals:['Main Terminal','Terminal A','Concourse B','Concourse C','Concourse D','Concourse E'],
+  IAD: { region:'North America', city:'Washington — Dulles', tz:'America/New_York', terminals:['Main Terminal','Terminal A','Concourse B','Concourse C','Concourse D','Concourse E'],
          airside:[['Main Terminal','Terminal A','Concourse B','Concourse C','Concourse D','Concourse E']] },
-  ATL: { city:'Atlanta',             tz:'America/New_York', terminals:['Concourse T','Concourse A','Concourse B','Concourse C','Concourse D','Concourse E','Concourse F'],
+  ATL: { region:'North America', city:'Atlanta',             tz:'America/New_York', terminals:['Concourse T','Concourse A','Concourse B','Concourse C','Concourse D','Concourse E','Concourse F'],
          airside:[['Concourse T','Concourse A','Concourse B','Concourse C','Concourse D','Concourse E','Concourse F']] },
-  ORD: { city:'Chicago — O\u2019Hare',   tz:'America/Chicago', terminals:['Terminal 1','Terminal 2','Terminal 3','Terminal 5'],
+  ORD: { region:'North America', city:'Chicago — O\u2019Hare',   tz:'America/Chicago', terminals:['Terminal 1','Terminal 2','Terminal 3','Terminal 5'],
          airside:[['Terminal 1','Terminal 2','Terminal 3'],['Terminal 5']] },
-  CLT: { city:'Charlotte',           tz:'America/New_York', terminals:['Main Terminal','Concourse A','Concourse B','Concourse C','Concourse D','Concourse E'],
+  CLT: { region:'North America', city:'Charlotte',           tz:'America/New_York', terminals:['Main Terminal','Concourse A','Concourse B','Concourse C','Concourse D','Concourse E'],
          airside:[['Main Terminal','Concourse A','Concourse B','Concourse C','Concourse D','Concourse E']] },
-  SEA: { city:'Seattle',             tz:'America/Los_Angeles', terminals:['Central Terminal','Concourse A','Concourse B','Concourse C','Concourse D','North Satellite','South Satellite'],
+  SEA: { region:'North America', city:'Seattle',             tz:'America/Los_Angeles', terminals:['Central Terminal','Concourse A','Concourse B','Concourse C','Concourse D','North Satellite','South Satellite'],
          airside:[['Central Terminal','Concourse A','Concourse B','Concourse C','Concourse D','North Satellite','South Satellite']] },
-  BOS: { city:'Boston',              tz:'America/New_York', terminals:['Terminal A','Terminal B','Terminal C','Terminal E'],
+  BOS: { region:'North America', city:'Boston',              tz:'America/New_York', terminals:['Terminal A','Terminal B','Terminal C','Terminal E'],
          airside:[['Terminal B','Terminal C','Terminal E'],['Terminal A']] },
-  IAH: { city:'Houston',             tz:'America/Chicago', terminals:['Terminal A','Terminal B','Terminal C','Terminal D','Terminal E'],
+  IAH: { region:'North America', city:'Houston',             tz:'America/Chicago', terminals:['Terminal A','Terminal B','Terminal C','Terminal D','Terminal E'],
          airside:[['Terminal A','Terminal B','Terminal C','Terminal D','Terminal E']] },
-  MSP: { city:'Minneapolis',         tz:'America/Chicago', terminals:['Concourse C','Concourse E','Concourse F','Concourse G'],
+  MSP: { region:'North America', city:'Minneapolis',         tz:'America/Chicago', terminals:['Concourse C','Concourse E','Concourse F','Concourse G'],
          airside:[['Concourse C','Concourse E','Concourse F','Concourse G']] },
-  DTW: { city:'Detroit',             tz:'America/New_York', terminals:['McNamara Terminal','Evans Terminal'],
+  DTW: { region:'North America', city:'Detroit',             tz:'America/New_York', terminals:['McNamara Terminal','Evans Terminal'],
          airside:[['McNamara Terminal'],['Evans Terminal']],
          note:'The two terminals at DTW are not connected after security — the shuttle between them drops you landside.' },
-  LAS: { city:'Las Vegas',           tz:'America/Los_Angeles', terminals:['Concourse B','Concourse C','Concourse D','Concourse E'],
+  LAS: { region:'North America', city:'Las Vegas',           tz:'America/Los_Angeles', terminals:['Concourse B','Concourse C','Concourse D','Concourse E'],
          airside:[['Concourse B','Concourse C','Concourse D','Concourse E']] },
-  MCO: { city:'Orlando',             tz:'America/New_York', terminals:['Terminal A','Terminal B','Terminal C'],
+  MCO: { region:'North America', city:'Orlando',             tz:'America/New_York', terminals:['Terminal A','Terminal B','Terminal C'],
          airside:[['Terminal A','Terminal B'],['Terminal C']] },
-  LHR: { city:'London — Heathrow',   tz:'Europe/London', terminals:['Terminal 2','Terminal 3','Terminal 4','Terminal 5'],
+  LHR: { region:'Europe', city:'London — Heathrow',   tz:'Europe/London', terminals:['Terminal 2','Terminal 3','Terminal 4','Terminal 5'],
          airside:[['Terminal 2'],['Terminal 3'],['Terminal 4'],['Terminal 5']],
          note:'Heathrow terminals are not connected after security. A lounge in another terminal means leaving, transferring and screening again — rarely worth it on a short connection.' },
-  CDG: { city:'Paris — Charles de Gaulle', tz:'Europe/Paris', terminals:['Terminal 1','Terminal 2E','Terminal 2F','Terminal 3'],
+  CDG: { region:'Europe', city:'Paris — Charles de Gaulle', tz:'Europe/Paris', terminals:['Terminal 1','Terminal 2E','Terminal 2F','Terminal 3'],
          airside:[['Terminal 1'],['Terminal 2E','Terminal 2F'],['Terminal 3']],
          note:'Charles de Gaulle is unusually thin for card lounges — one Priority Pass venue across the whole airport, and no Centurion Lounge. Plan on an airline lounge or nothing.' },
-  AMS: { city:'Amsterdam',           tz:'Europe/Amsterdam', terminals:['Departures Hall 1','Departures Hall 2','Departures Hall 3'],
+  AMS: { region:'Europe', city:'Amsterdam',           tz:'Europe/Amsterdam', terminals:['Departures Hall 1','Departures Hall 2','Departures Hall 3'],
          airside:[['Departures Hall 1','Departures Hall 2','Departures Hall 3']],
          note:'Schiphol is one connected airside area, but Schengen and non-Schengen zones are separated by passport control — check which side your gate is on before walking to a lounge.' },
-  FRA: { city:'Frankfurt',           tz:'Europe/Berlin', terminals:['Terminal 1','Terminal 2','Terminal 3'],
+  FRA: { region:'Europe', city:'Frankfurt',           tz:'Europe/Berlin', terminals:['Terminal 1','Terminal 2','Terminal 3'],
          airside:[['Terminal 1'],['Terminal 2'],['Terminal 3']],
          note:'Frankfurt splits Schengen and non-Schengen departures within each terminal, and Terminal 3 is a separate building. Confirm your gate zone before committing to a lounge.' },
-  DUB: { city:'Dublin',              tz:'Europe/Dublin', terminals:['Terminal 1','Terminal 2','US Preclearance'],
+  DUB: { region:'Europe', city:'Dublin',              tz:'Europe/Dublin', terminals:['Terminal 1','Terminal 2','US Preclearance'],
          airside:[['Terminal 1','Terminal 2'],['US Preclearance']],
          note:'Dublin clears US immigration before you fly. Once you enter preclearance you cannot go back to the main terminal — so use any lounge before you clear, not after.' },
-  FCO: { city:'Rome',                tz:'Europe/Rome', terminals:['Terminal 1','Terminal 3'],
+  FCO: { region:'Europe', city:'Rome',                tz:'Europe/Rome', terminals:['Terminal 1','Terminal 3'],
          airside:[['Terminal 1'],['Terminal 3']] },
-  MAD: { city:'Madrid',              tz:'Europe/Madrid', terminals:['Terminal 1','Terminal 2','Terminal 3','Terminal 4','Terminal 4 Satellite'],
+  MAD: { region:'Europe', city:'Madrid',              tz:'Europe/Madrid', terminals:['Terminal 1','Terminal 2','Terminal 3','Terminal 4','Terminal 4 Satellite'],
          airside:[['Terminal 1','Terminal 2','Terminal 3'],['Terminal 4','Terminal 4 Satellite']],
          note:'Terminals 1 to 3 connect on foot; Terminal 4 and its satellite are a train ride away and cannot be reached from T1–T3 after security.' },
-  YYZ: { city:'Toronto',             tz:'America/Toronto', terminals:['T1 Domestic','T1 US Transborder','T1 International','T3 Domestic','T3 US Departures','T3 International'],
+  YYZ: { region:'North America', city:'Toronto',             tz:'America/Toronto', terminals:['T1 Domestic','T1 US Transborder','T1 International','T3 Domestic','T3 US Departures','T3 International'],
          airside:[['T1 Domestic'],['T1 US Transborder'],['T1 International'],['T3 Domestic'],['T3 US Departures'],['T3 International']],
          note:'Toronto separates domestic, US transborder and international behind different checkpoints. US flights clear American immigration here, and you cannot return to the rest of the airport afterwards.' },
-  YVR: { city:'Vancouver',           tz:'America/Vancouver', terminals:['Domestic','International','US Transborder'],
+  YVR: { region:'North America', city:'Vancouver',           tz:'America/Vancouver', terminals:['Domestic','International','US Transborder'],
          airside:[['Domestic'],['International'],['US Transborder']],
          note:'US flights from Vancouver clear American immigration before departure. Once through, only the transborder lounges are reachable.' },
 };
@@ -1898,14 +1900,36 @@ function renderTabs() {
 
 /* The strip is the only place airports are chosen — each stop carries its own
    picker, so there is no second list elsewhere saying the same thing. */
+/* Regions in travel-frequency order, then anything unrecognised, so a new
+   continent shows up without needing this list edited. */
+const REGION_ORDER = ['North America', 'Europe', 'Asia', 'Oceania', 'South America', 'Africa', 'Middle East'];
+
+function airportsByRegion() {
+  const groups = {};
+  Object.keys(AIRPORTS).forEach(c => {
+    const r = AIRPORTS[c].region || 'Other';
+    (groups[r] = groups[r] || []).push(c);
+  });
+  Object.values(groups).forEach(list => list.sort());
+  const names = Object.keys(groups).sort((a, b) => {
+    const ia = REGION_ORDER.indexOf(a), ib = REGION_ORDER.indexOf(b);
+    return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib) || a.localeCompare(b);
+  });
+  return names.map(name => ({ name, codes: groups[name] }));
+}
+
 function renderTrip() {
   const el = document.getElementById('trip');
-  const codes = Object.keys(AIRPORTS);
+  const regions = airportsByRegion();
 
   const stop = (slot, role) => {
     const taken = slot === 'from' ? (state.legs.via && state.legs.via.airport) : state.legs.from.airport;
-    const opts = codes.map(c =>
-      `<option value="${c}"${c === state.legs[slot].airport ? ' selected' : ''}${c === taken ? ' disabled' : ''}>${c}</option>`
+    const opts = regions.map(r =>
+      `<optgroup label="${esc(r.name)}">` +
+      r.codes.map(c =>
+        `<option value="${c}"${c === state.legs[slot].airport ? ' selected' : ''}${c === taken ? ' disabled' : ''}>${c}</option>`
+      ).join('') +
+      `</optgroup>`
     ).join('');
     return `
       <div class="stop${state.slot === slot ? ' is-active' : ''}" data-slot="${slot}">
@@ -2247,9 +2271,13 @@ function unlockedIn(code, terminals, held) {
 function sumValue(list) { return list.reduce((s, p) => s + p.v, 0); }
 
 function renderPlanControls() {
-  document.getElementById('homeRow').innerHTML = Object.keys(AIRPORTS).map(code =>
-    `<button class="home" data-home="${code}" aria-pressed="${state.home.includes(code)}">${code}</button>`
-  ).join('');
+  document.getElementById('homeRow').innerHTML = airportsByRegion().map(r => `
+    <div class="home-group">
+      <div class="issuer-name">${esc(r.name)}</div>
+      <div class="home-chips">${r.codes.map(code =>
+        `<button class="home" data-home="${code}" aria-pressed="${state.home.includes(code)}">${code}</button>`
+      ).join('')}</div>
+    </div>`).join('');
 
   document.getElementById('airline').innerHTML = Object.keys(AIRLINES).map(name =>
     `<option value="${esc(name)}"${name === state.airline ? ' selected' : ''}>${esc(name)}</option>`
