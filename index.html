@@ -662,6 +662,34 @@
     font-size: 14px;
   }
 
+  .onboard {
+    padding: 32px 20px 34px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+  }
+  .onboard h2 {
+    font-family: Archivo, sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: -0.01em;
+    margin: 0 0 9px;
+  }
+  .onboard p {
+    margin: 0 0 10px;
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--ink-2);
+    max-width: 56ch;
+  }
+  .onboard p:last-child { margin-bottom: 0; }
+  .onboard b { color: var(--ink); font-weight: 600; }
+  .onboard-sub {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px !important;
+    color: var(--ink-3) !important;
+    padding-top: 4px;
+  }
+
   .summary-note {
     margin: 0;
     padding: 11px 20px 13px;
@@ -1759,7 +1787,7 @@ const PERKS = [
 
 /* ============================ STATE ============================ */
 const DEFAULTS = {
-  cards:['csr'], dod:false,
+  cards:[], dod:false,
   legs: { from:{ airport:'JFK', terminal:'', gate:'', flight:'' }, via:null },
   slot: 'from',
   tab:'now', home:['JFK'], airline:'American', income:'skip'
@@ -1907,9 +1935,14 @@ function render() {
   renderDeadCards();
   renderLocked(locked, held);
 
+  // Before any cards are picked, the stats and the money note are just zeros.
+  const bare = !state.cards.length && !state.dod;
+  document.getElementById('summary').hidden = bare;
+
   const money = "Dollar figures are what you'd pay at the door without the card — day-pass rates for lounges, menu price for a spa treatment or a gaming hour.";
-  document.getElementById('airportNote').innerHTML =
-    esc(money) + (airport.note ? ` <b>${esc(airport.note)}</b>` : '');
+  document.getElementById('airportNote').innerHTML = bare
+    ? (airport.note ? `<b>${esc(airport.note)}</b>` : '')
+    : esc(money) + (airport.note ? ` <b>${esc(airport.note)}</b>` : '');
 
   renderPlanControls();
   renderPlan();
@@ -2087,8 +2120,13 @@ function renderSummary(unlocked, locked) {
 function renderResults(unlocked, held) {
   const el = document.getElementById('results');
 
-  if (!state.cards.length) {
-    el.innerHTML = `<p class="empty">Pick at least one card above and this fills in.</p>`;
+  if (!state.cards.length && !state.dod) {
+    el.innerHTML = `
+      <div class="onboard">
+        <h2>Start with your wallet</h2>
+        <p>Open <b>My cards</b> above and tick what you carry. Nothing is assumed and nothing is sent anywhere &mdash; your selection stays in this browser.</p>
+        <p class="onboard-sub">There are ${PERKS.filter(p => p.a === leg().airport).length} venues at ${esc(leg().airport)} waiting to be filtered down to the ones you can actually walk into.</p>
+      </div>`;
     return;
   }
   if (!unlocked.length) {
@@ -2233,7 +2271,8 @@ function renderDeadCards() {
 
 function renderLocked(locked, held) {
   const el = document.getElementById('locked');
-  if (!locked.length) {
+  // With an empty wallet everything is locked, which is noise rather than news.
+  if (!locked.length || (!state.cards.length && !state.dod)) {
     el.innerHTML = '';
     return;
   }
@@ -2627,6 +2666,11 @@ document.getElementById('income').addEventListener('change', e => {
 });
 
 render();
+
+// First visit: open the wallet, since picking cards is the only useful next move.
+if (!state.cards.length && !state.dod) {
+  document.querySelectorAll('.wallet').forEach(w => { w.open = true; });
+}
 </script>
 
 </body>
