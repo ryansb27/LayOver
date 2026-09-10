@@ -1,0 +1,2212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Every perk your credit cards actually unlock at 12 US airports — lounges, gaming, spas, dining credits — sorted by how far it is from your gate.">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="Layover">
+<meta property="og:description" content="Every perk your credit cards actually unlock at this airport, sorted by how far it is from your gate.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%F0%9F%9B%AB</text></svg>">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<title>Layover</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+  /* ---- Tokens: light (bare :root defines the complete palette) ---- */
+  :root {
+    --bg:            #E9EDF1;
+    --surface:       #FFFFFF;
+    --surface-2:     #F3F6F8;
+    --surface-sunk:  #DFE5EA;
+    --ink:           #101A24;
+    --ink-2:         #4C5B69;
+    --ink-3:         #74838F;
+    --line:          #CFD8E0;
+    --line-strong:   #A8B6C2;
+    --accent:        #B26B06;
+    --accent-fill:   #E9A322;
+    --accent-soft:   #FBEED4;
+    --board:         #16202B;
+    --board-ink:     #F0D9A8;
+    --locked:        #8A96A2;
+    --focus:         #2D6FA8;
+    --good:          #2E7D5B;
+    --bad:           #B3402F;
+
+    --r-sm: 3px;
+    --r-md: 6px;
+    --shadow: 0 1px 2px rgba(16,26,36,.06), 0 6px 20px -12px rgba(16,26,36,.28);
+
+    color-scheme: light;
+  }
+
+  /* ---- Tokens: dark via OS preference (guarded so an explicit light choice wins) ---- */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:            #0A1118;
+      --surface:       #141E28;
+      --surface-2:     #1B2733;
+      --surface-sunk:  #0E1720;
+      --ink:           #E7EDF3;
+      --ink-2:         #9DACBA;
+      --ink-3:         #74838F;
+      --line:          #253340;
+      --line-strong:   #3A4A58;
+      --accent:        #F0B23F;
+      --accent-fill:   #E9A322;
+      --accent-soft:   #2B2416;
+      --board:         #060C11;
+      --board-ink:     #F0D9A8;
+      --locked:        #66737F;
+      --focus:         #6FA8DC;
+      --good:          #4FB68A;
+      --bad:           #E0785F;
+
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px -12px rgba(0,0,0,.7);
+      color-scheme: dark;
+    }
+  }
+
+  /* ---- Tokens: dark via explicit choice ---- */
+  :root[data-theme="dark"] {
+    --bg:            #0A1118;
+    --surface:       #141E28;
+    --surface-2:     #1B2733;
+    --surface-sunk:  #0E1720;
+    --ink:           #E7EDF3;
+    --ink-2:         #9DACBA;
+    --ink-3:         #74838F;
+    --line:          #253340;
+    --line-strong:   #3A4A58;
+    --accent:        #F0B23F;
+    --accent-fill:   #E9A322;
+    --accent-soft:   #2B2416;
+    --board:         #060C11;
+    --board-ink:     #F0D9A8;
+    --locked:        #66737F;
+    --focus:         #6FA8DC;
+    --good:          #4FB68A;
+    --bad:           #E0785F;
+
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px -12px rgba(0,0,0,.7);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 0 64px;
+  }
+
+  :where(a, button, input, select, summary):focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  /* ---------- Masthead: departure-board slab ---------- */
+  .masthead {
+    background: var(--board);
+    color: var(--board-ink);
+    padding: 22px 20px 20px;
+    border-bottom: 3px solid var(--accent-fill);
+  }
+  .masthead-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .wordmark {
+    font-family: Archivo, ui-sans-serif, system-ui, sans-serif;
+    font-weight: 800;
+    font-size: clamp(26px, 7vw, 38px);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin: 0;
+    color: #FFFFFF;
+    text-wrap: balance;
+  }
+  .wordmark em {
+    font-style: normal;
+    color: var(--accent-fill);
+  }
+  .masthead p {
+    margin: 10px 0 0;
+    font-size: 13.5px;
+    line-height: 1.45;
+    color: #A9B7C4;
+    max-width: 58ch;
+  }
+  .stamp {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: #6E8091;
+    white-space: nowrap;
+  }
+
+  /* ---------- Trip strip ---------- */
+  .trip {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    padding: 12px 20px;
+    background: var(--surface-sunk);
+    border-bottom: 1px solid var(--line);
+    overflow-x: auto;
+  }
+  .stop {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    text-align: left;
+    padding: 7px 14px 8px;
+    border: 1.5px solid var(--line-strong);
+    border-radius: var(--r-sm);
+    background: var(--surface);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color .12s, background .12s;
+  }
+  .stop:hover { border-color: var(--ink-3); }
+  .stop.is-active {
+    background: var(--board);
+    border-color: var(--board);
+  }
+  .stop-role {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 9px;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .stop.is-active .stop-role { color: var(--accent-fill); }
+  .stop.is-active[data-slot="via"] .stop-role { color: #7FB3DC; }
+  .stop { position: relative; }
+  .stop-sel {
+    font-family: Archivo, sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: .03em;
+    line-height: 1.15;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    width: auto;
+    padding: 0 17px 0 0;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .stop.is-active .stop-sel { color: #FFFFFF; }
+  .stop-sel option { color: var(--ink); background: var(--surface); }
+  .stop::after {
+    content: "\25BE";
+    position: absolute;
+    right: 12px;
+    bottom: 9px;
+    font-size: 10px;
+    color: var(--ink-3);
+    pointer-events: none;
+  }
+  .stop.is-active::after { color: var(--accent-fill); }
+  .stop.is-active[data-slot="via"]::after { color: #7FB3DC; }
+  .stop.is-add::after { content: none; }
+  .stop.is-add {
+    justify-content: center;
+    border-style: dashed;
+    color: var(--ink-2);
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .stop-drop {
+    border: none;
+    background: transparent;
+    color: var(--ink-3);
+    font-size: 19px;
+    line-height: 1;
+    padding: 0 4px;
+    cursor: pointer;
+  }
+  .stop-drop:hover { color: var(--bad); }
+  .trip-arrow {
+    align-self: center;
+    color: var(--ink-3);
+    font-size: 15px;
+  }
+
+  /* ---------- Military status ---------- */
+  .dod {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 11px 13px;
+    border: 1.5px solid var(--line-strong);
+    border-radius: var(--r-sm);
+    background: var(--surface);
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--ink-2);
+  }
+  .dod input { margin: 2px 0 0; accent-color: var(--accent-fill); flex: none; width: 15px; height: 15px; }
+  .dod b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- Controls ---------- */
+  .controls {
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    padding: 16px 20px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .field-label {
+    display: block;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 8px;
+  }
+
+  .where-row {
+    display: grid;
+    grid-template-columns: 1fr 96px;
+    gap: 10px;
+    align-items: end;
+  }
+  select, input[type="text"] {
+    width: 100%;
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 15px;
+    padding: 9px 10px;
+    border: 1.5px solid var(--line-strong);
+    border-radius: var(--r-sm);
+    background: var(--surface);
+    color: var(--ink);
+  }
+  input[type="text"] {
+    font-family: "IBM Plex Mono", monospace;
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+
+  /* ---------- Wallet ---------- */
+  .wallet { border: 1.5px solid var(--line-strong); border-radius: var(--r-sm); background: var(--surface); }
+  .wallet > summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 11px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .wallet > summary::-webkit-details-marker { display: none; }
+  .wallet-count {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .06em;
+    color: var(--ink-2);
+    background: var(--surface-sunk);
+    padding: 3px 8px;
+    border-radius: 100px;
+  }
+  .wallet-body { padding: 4px 14px 14px; border-top: 1px solid var(--line); }
+  .issuer-group { margin-top: 14px; }
+  .issuer-name {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 6px;
+  }
+  .card-opt {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 5px 0;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1.35;
+  }
+  .card-opt input { margin: 3px 0 0; accent-color: var(--accent-fill); flex: none; width: 15px; height: 15px; }
+
+  /* ---------- Summary strip ---------- */
+  .summary {
+    background: var(--surface-sunk);
+    border-bottom: 1px solid var(--line);
+    padding: 14px 20px;
+    display: flex;
+    gap: 26px;
+    flex-wrap: wrap;
+    align-items: baseline;
+  }
+  .stat-n {
+    font-family: Archivo, sans-serif;
+    font-weight: 700;
+    font-size: 27px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    display: block;
+  }
+  .stat-n.is-accent { color: var(--accent); }
+  .stat-l {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    display: block;
+    margin-top: 5px;
+  }
+
+  /* ---------- Sticky airport context ---------- */
+  .context {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 11px;
+    padding: 10px 20px 11px;
+    background: var(--board);
+    border-bottom: 3px solid var(--accent-fill);
+  }
+  .context.is-via { border-bottom-color: var(--focus); }
+  .ctx-role {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: #16202B;
+    background: var(--accent-fill);
+    padding: 3px 7px;
+    border-radius: var(--r-sm);
+  }
+  .context.is-via .ctx-role { background: var(--focus); color: #FFFFFF; }
+  .ctx-code {
+    font-family: Archivo, sans-serif;
+    font-weight: 700;
+    font-size: 19px;
+    letter-spacing: .04em;
+    color: #FFFFFF;
+    line-height: 1;
+  }
+  .ctx-city { font-size: 13px; color: #A9B7C4; }
+  .ctx-term {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    color: var(--board-ink);
+    margin-left: auto;
+  }
+
+  .t-code {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .08em;
+    color: var(--ink-3);
+    margin-right: 9px;
+    vertical-align: 1px;
+  }
+
+  /* ---------- Terminal sections ---------- */
+  .terminal { margin-top: 26px; }
+  .terminal-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 20px 9px;
+    border-bottom: 2px solid var(--ink);
+    margin: 0 0 2px;
+  }
+  .terminal-name {
+    font-family: Archivo, sans-serif;
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: -0.01em;
+    margin: 0;
+    flex: 1;
+  }
+  .here-tag {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    background: var(--accent-fill);
+    color: #16202B;
+    padding: 3px 7px;
+    border-radius: var(--r-sm);
+  }
+  .terminal-count {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- Perk rows: bands, not cards ---------- */
+  .perk {
+    display: grid;
+    grid-template-columns: 4px 1fr auto;
+    gap: 0 14px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    padding: 0;
+  }
+  .perk-stripe { background: var(--accent-fill); }
+  .perk-main { padding: 13px 0 14px; min-width: 0; }
+  .perk-value {
+    padding: 13px 20px 14px 0;
+    text-align: right;
+    white-space: nowrap;
+  }
+  .perk-name {
+    font-family: Archivo, sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -0.005em;
+    margin: 0 0 3px;
+    line-height: 1.25;
+  }
+  .perk-kind {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 7px;
+  }
+  .perk-get {
+    margin: 0 0 9px;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--ink);
+    max-width: 56ch;
+  }
+  .perk-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px;
+    color: var(--ink-2);
+    font-variant-numeric: tabular-nums;
+  }
+  .perk-meta .gate { color: var(--ink); font-weight: 500; }
+  .perk-meta .near { color: var(--accent); font-weight: 600; }
+  .via {
+    margin-top: 9px;
+    font-size: 12.5px;
+    color: var(--ink-2);
+    line-height: 1.4;
+  }
+  .via b { color: var(--ink); font-weight: 600; }
+  .flag {
+    margin-top: 9px;
+    font-size: 12.5px;
+    line-height: 1.45;
+    background: var(--accent-soft);
+    border-left: 2px solid var(--accent-fill);
+    padding: 7px 10px;
+    color: var(--ink);
+    max-width: 56ch;
+  }
+
+  /* ---------- Locked ---------- */
+  .locked-section { margin-top: 44px; }
+  .section-head { padding: 0 20px; }
+  .section-title {
+    font-family: Archivo, sans-serif;
+    font-weight: 700;
+    font-size: 19px;
+    letter-spacing: -0.01em;
+    margin: 0 0 5px;
+  }
+  .section-sub {
+    margin: 0 0 18px;
+    font-size: 13.5px;
+    color: var(--ink-2);
+    max-width: 60ch;
+  }
+  .unlock-group {
+    background: var(--surface-2);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 14px;
+  }
+  .unlock-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 20px 10px;
+    border-bottom: 1px dashed var(--line-strong);
+    flex-wrap: wrap;
+  }
+  .unlock-card {
+    font-family: Archivo, sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    margin: 0;
+  }
+  .unlock-worth {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px;
+    color: var(--ink-2);
+    font-variant-numeric: tabular-nums;
+  }
+  .locked-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 9px 20px;
+    border-bottom: 1px solid var(--line);
+    font-size: 13.5px;
+    color: var(--locked);
+  }
+  .locked-item:last-child { border-bottom: none; }
+  .locked-item b { color: var(--ink-2); font-weight: 600; }
+  .locked-where {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px;
+    white-space: nowrap;
+    color: var(--locked);
+  }
+
+  .empty {
+    padding: 30px 20px;
+    color: var(--ink-2);
+    font-size: 14px;
+  }
+
+  .summary-note {
+    margin: 0;
+    padding: 11px 20px 13px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--line);
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+  .summary-note:empty { display: none; }
+
+  .pv-amt {
+    display: block;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 15px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+  }
+  .pv-lbl {
+    display: block;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 9px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-top: 3px;
+  }
+  .level {
+    background: var(--surface-sunk);
+    padding: 1px 7px 2px;
+    border-radius: var(--r-sm);
+    color: var(--ink-2);
+  }
+
+  .opt {
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--ink-3);
+  }
+  .hint {
+    margin: 7px 0 0;
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: var(--ink-2);
+  }
+  .hint:empty { display: none; }
+
+  .badge {
+    font-weight: 600;
+    padding: 1px 7px 2px;
+    border-radius: var(--r-sm);
+    letter-spacing: .02em;
+  }
+  .badge.is-open   { background: var(--good); color: #FFFFFF; }
+  .badge.is-soon   { background: var(--accent-fill); color: #16202B; }
+  .badge.is-closed { background: var(--surface-sunk); color: var(--ink-3); }
+
+  .perk.is-shut { opacity: .55; }
+  .perk.is-shut .perk-stripe { background: var(--line-strong); }
+
+  .guests {
+    margin-top: 6px;
+    font-size: 12.5px;
+    line-height: 1.4;
+    color: var(--ink-2);
+  }
+  .guests span {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 9.5px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-right: 7px;
+  }
+
+  .reach {
+    padding: 8px 20px 9px;
+    font-size: 12.5px;
+    font-weight: 500;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--line);
+  }
+  .reach.is-ok { color: var(--good); }
+  .reach.is-no { color: var(--bad); }
+
+  /* ---------- Mode tabs ---------- */
+  .tabs {
+    display: flex;
+    background: var(--board);
+    padding: 0 20px;
+    gap: 2px;
+  }
+  .tab {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    padding: 11px 15px 10px;
+    border: none;
+    background: transparent;
+    color: #7E90A1;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: color .12s, border-color .12s;
+  }
+  .tab:hover { color: #C3D0DB; }
+  .tab[aria-selected="true"] {
+    color: #FFFFFF;
+    border-bottom-color: var(--accent-fill);
+  }
+  [hidden] { display: none !important; }
+
+  /* ---------- Plan mode ---------- */
+  .plan-controls {
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    padding: 16px 20px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .home-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .home {
+    font-family: Archivo, sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: .04em;
+    padding: 7px 13px;
+    border: 1.5px dashed var(--line-strong);
+    border-radius: var(--r-sm);
+    background: var(--surface);
+    color: var(--ink-3);
+    cursor: pointer;
+  }
+  .home[aria-pressed="true"] {
+    border-style: solid;
+    border-color: var(--accent-fill);
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .verdict {
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: 4px 1fr;
+  }
+  .verdict-stripe { background: var(--line-strong); }
+  .verdict.is-good  .verdict-stripe { background: var(--good); }
+  .verdict.is-thin  .verdict-stripe { background: var(--accent-fill); }
+  .verdict.is-bad   .verdict-stripe { background: var(--bad); }
+  .verdict-body { padding: 14px 20px 15px; }
+  .verdict-route {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 5px;
+  }
+  .verdict-line {
+    font-family: Archivo, sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.3;
+    margin: 0 0 7px;
+    text-wrap: balance;
+  }
+  .verdict.is-good .verdict-line { color: var(--good); }
+  .verdict.is-bad  .verdict-line { color: var(--bad); }
+  .verdict-detail {
+    margin: 0;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--ink-2);
+    max-width: 58ch;
+  }
+  .verdict-detail b { color: var(--ink); font-weight: 600; }
+
+  .rec {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px 14px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    padding: 13px 20px 14px;
+    align-items: baseline;
+  }
+  .rec-name {
+    font-family: Archivo, sans-serif;
+    font-weight: 700;
+    font-size: 15.5px;
+    margin: 0;
+  }
+  .rec-fee {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-2);
+    white-space: nowrap;
+  }
+  .rec-why {
+    grid-column: 1 / -1;
+    margin: 3px 0 0;
+    font-size: 13.5px;
+    line-height: 1.45;
+    color: var(--ink-2);
+    max-width: 58ch;
+  }
+  .rec-why b { color: var(--ink); font-weight: 600; }
+  .rec-gain {
+    grid-column: 1 / -1;
+    margin-top: 7px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .rec-closed {
+    grid-column: 1 / -1;
+    margin-top: 7px;
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: var(--ink-3);
+    border-left: 2px solid var(--line-strong);
+    padding-left: 9px;
+  }
+  .rank {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- Footer ---------- */
+  footer {
+    margin: 46px 20px 0;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--ink-3);
+  }
+  footer p { margin: 0 0 8px; max-width: 62ch; }
+  footer b { color: var(--ink-2); font-weight: 600; }
+
+  @media (max-width: 460px) {
+    .summary { gap: 18px; }
+    .perk-value { padding-right: 16px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="masthead-top">
+      <h1 class="wordmark">Layo<em>ver</em></h1>
+      <span class="stamp">12 airports &middot; Verified Sep 2026</span>
+    </div>
+    <p>Every perk your cards actually unlock at this airport &mdash; lounges, gaming, spa treatments, dining credits &mdash; sorted by how far it is from your gate.</p>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" id="tab-now" role="tab" aria-selected="true" aria-controls="panel-now">At the airport</button>
+    <button class="tab" id="tab-plan" role="tab" aria-selected="false" aria-controls="panel-plan">Plan ahead</button>
+  </nav>
+
+  <div id="panel-now" role="tabpanel" aria-labelledby="tab-now">
+
+  <div class="trip" id="trip"></div>
+
+  <section class="controls">
+    <div>
+      <label class="field-label" for="flight">Flight number <span class="opt">optional &mdash; fills in your terminal</span></label>
+      <input type="text" id="flight" placeholder="AA 2419" autocomplete="off" spellcheck="false">
+      <p class="hint" id="flightHint"></p>
+    </div>
+
+    <div class="where-row">
+      <div>
+        <label class="field-label" for="terminal">Your terminal</label>
+        <select id="terminal"></select>
+      </div>
+      <div>
+        <label class="field-label" for="gate">Gate</label>
+        <input type="text" id="gate" placeholder="B42" autocomplete="off" spellcheck="false">
+      </div>
+    </div>
+
+    <details class="wallet" id="wallet">
+      <summary>
+        <span>My cards</span>
+        <span class="wallet-count" id="walletCount">1 selected</span>
+      </summary>
+      <div class="wallet-body" id="walletBody"></div>
+    </details>
+
+    <label class="dod">
+      <input type="checkbox" id="dod">
+      <span><b>I carry a DoD ID</b> &mdash; active duty, Reserve, Guard, retiree, or a dependent with their own ID. Veterans without a DoD ID are not eligible for USO centers.</span>
+    </label>
+  </section>
+
+  <section class="summary" id="summary"></section>
+  <p class="summary-note" id="airportNote"></p>
+  <p class="summary-note" id="deadNote"></p>
+  <p class="summary-note" id="milNote"></p>
+
+  <div class="context" id="context"></div>
+
+  <main id="results"></main>
+
+  <section class="locked-section" id="locked"></section>
+
+  </div><!-- /panel-now -->
+
+  <div id="panel-plan" role="tabpanel" aria-labelledby="tab-plan" hidden>
+
+    <section class="plan-controls">
+      <div>
+        <span class="field-label">Airports you fly from</span>
+        <div class="home-row" id="homeRow"></div>
+      </div>
+      <div>
+        <label class="field-label" for="airline">Airline you fly most</label>
+        <select id="airline"></select>
+      </div>
+      <div>
+        <label class="field-label" for="income">Household income</label>
+        <select id="income"></select>
+      </div>
+    </section>
+
+    <div id="planResults"></div>
+
+  </div><!-- /panel-plan -->
+
+  <footer>
+    <p><b>Prototype.</b> Perk data is hand-curated across 12 airports and 32 cards, and reflects public sources as of September 2026. Airport benefits change constantly &mdash; lounges leave networks, restaurants drop out, terminals get reassigned. Confirm in your issuer's app before you count on anything here.</p>
+    <p><b>Open now</b> is calculated in the airport's own timezone, not your phone's. Venues with irregular hours show their schedule without a badge rather than risk a wrong one, and anything shut drops to the bottom of its terminal.</p>
+    <p><b>Getting there.</b> When you set a terminal, every other terminal is marked with whether you can walk to it without clearing security again. Where a connection is uncertain we err toward telling you to re-screen &mdash; a wasted walk costs you minutes, a missed connection costs you the flight.</p>
+    <p><b>Military access</b> is compiled from USO's published admissions policy and airline baggage pages, not from lived experience &mdash; verify with the USO app before relying on it. The eligibility line that catches people out: active duty, Reserve, Guard, retirees and dependents with a DoD ID all qualify, but veterans without one do not. Baggage rules also differ sharply between travelling on orders and travelling personally.</p>
+    <p><b>Guest rules changed a lot in 2026.</b> Capital One ended free Priority Pass guests, Amex cut Centurion to one guest with a $50 fee beyond that, and Sapphire Reserve quietly became the most generous of the three at two guests free.</p>
+    <p><b>Why the same "Priority Pass" differs by card:</b> Amex- and Capital One-issued Priority Pass memberships cover lounges only. Chase-issued memberships add non-lounge experiences like Gameway, spas and Minute Suites, but dropped restaurant credits. Citi, Bank of America and U.S. Bank memberships still include restaurant credits. This app models each separately.</p>
+  </footer>
+
+</div>
+
+<script>
+/* ============================ ACCESS PROGRAMS ============================ */
+const PROGRAMS = {
+  'pp-lounge':     'Priority Pass lounges',
+  'pp-experience': 'Priority Pass experiences',
+  'pp-restaurant': 'Priority Pass dining credit',
+  'centurion':     'Amex Centurion Lounge',
+  'sapphire':      'Chase Sapphire Lounge',
+  'capone':        'Capital One Lounge',
+  'delta-sky':     'Delta Sky Club',
+  'admirals':      'Admirals Club',
+  'united-club':   'United Club',
+  'alaska':        'Alaska Lounge',
+  'plaza-premium': 'Plaza Premium',
+  'military':      'DoD ID'
+};
+
+/* Airline military baggage and boarding. Rules differ sharply between travelling
+   on orders and travelling personally, so both are stated. */
+const MILITARY_AIRLINE = {
+  'American':  'Up to 5 free checked bags on orders (100 lb each), 3 for personal travel. Group 1 boarding with an active-duty ID.',
+  'Delta':     'Up to 5 free checked bags on orders, up to 100 lb each. Early boarding with a military ID.',
+  'United':    'Between 2 and 5 free checked bags on orders, including leave orders. Early boarding with a military ID.',
+  'JetBlue':   '2 free checked bags for active duty, up to 5 on orders including dependents. Overweight and oversize fees waived on orders.',
+  'Southwest': 'No limit on free checked bags for PCS orders, provided no bag exceeds 100 lb or 80 inches.',
+  'Alaska':    'Up to 5 free checked bags for active-duty personnel.'
+};
+
+/* ============================ CARDS ============================ */
+const CARDS = [
+  /* ---- Chase ---- */
+  { id:'csr', issuer:'Chase', name:'Sapphire Reserve', fee:795, grants:['pp-lounge','pp-experience','sapphire'], extras:[
+    { n:'Global Entry or TSA PreCheck credit', k:'Security', per:'4 years', v:120, what:'Up to $120 reimbursed, then you use the PreCheck lane at every checkpoint.', where:'Any security checkpoint' },
+    { n:'$300 annual travel credit', k:'Credit', per:'year', v:300, what:'Applies automatically to travel purchases, which covers a lot of airport food and shops.', where:'Airport-wide' }
+  ]},
+  { id:'csr-biz', issuer:'Chase', name:'Sapphire Reserve for Business', fee:795, grants:['pp-lounge','pp-experience','sapphire'], extras:[
+    { n:'Global Entry or TSA PreCheck credit', k:'Security', per:'4 years', v:120, what:'Up to $120 reimbursed, then you use the PreCheck lane at every checkpoint.', where:'Any security checkpoint' },
+    { n:'$300 annual travel credit', k:'Credit', per:'year', v:300, what:'Applies automatically to travel purchases.', where:'Airport-wide' }
+  ]},
+  { id:'csp', issuer:'Chase', name:'Sapphire Preferred', fee:95, grants:[], extras:[] },
+  { id:'jpmr', issuer:'Chase', name:'J.P. Morgan Reserve', fee:795, closed:'Invitation only — requires a large J.P. Morgan banking relationship.', grants:['pp-lounge','pp-experience','sapphire'], extras:[
+    { n:'Global Entry or TSA PreCheck credit', k:'Security', per:'4 years', v:120, what:'Up to $120 reimbursed every four years.', where:'Any security checkpoint' }
+  ]},
+  { id:'ritz', issuer:'Chase', name:'Ritz-Carlton Card', fee:450, closed:'Closed to new applicants — only available by upgrading an existing Marriott card.', grants:['pp-lounge','pp-experience','sapphire'], extras:[
+    { n:'$100 airline incidental credit', k:'Credit', per:'year', v:100, what:'Covers checked bags and in-flight purchases on one airline you pick.', where:'Check-in counter' }
+  ]},
+  { id:'united-inf', issuer:'Chase', name:'United Club Infinite', fee:525, grants:['united-club','pp-lounge','pp-experience'], extras:[
+    { n:'Two free checked bags on United', k:'Bags', per:'trip', v:80, what:'First and second bag free for you and a companion — about $80 each way.', where:'Check-in counter', airline:'United' },
+    { n:'Premier Access', k:'Security', per:'trip', v:15, what:'Dedicated check-in, security and boarding lanes on United.', where:'Check-in and your gate', airline:'United' },
+    { n:'Global Entry or TSA PreCheck credit', k:'Security', per:'4 years', v:120, what:'Up to $120 reimbursed every four years.', where:'Any security checkpoint' }
+  ]},
+  { id:'united-exp', issuer:'Chase', name:'United Explorer', fee:150, grants:['united-club'], extras:[
+    { n:'First checked bag free on United', k:'Bags', per:'trip', v:40, what:'For you and one companion — about $40 each way.', where:'Check-in counter', airline:'United' },
+    { n:'Priority boarding on United', k:'Boarding', per:'trip', v:0, what:'Board ahead of general boarding groups.', where:'Your gate', airline:'United' },
+    { n:'Two United Club passes a year', k:'Lounge', per:'year', v:118, what:'One-day passes worth about $59 each.', where:'Any United Club' },
+    { n:'Global Entry or TSA PreCheck credit', k:'Security', per:'4 years', v:120, what:'Up to $120 reimbursed every four years.', where:'Any security checkpoint' }
+  ]},
+  { id:'freedom', issuer:'Chase', name:'Freedom Unlimited', fee:0, grants:[], extras:[] },
+
+  /* ---- Amex ---- */
+  { id:'plat', issuer:'Amex', name:'Platinum', fee:895, grants:['centurion','pp-lounge','delta-sky','plaza-premium'], extras:[
+    { n:'CLEAR Plus membership credit', k:'Security', per:'year', v:209, what:'Covers CLEAR Plus in full — you skip the ID check and walk to the front of the screening line.', where:'CLEAR lane at the checkpoint' },
+    { n:'Global Entry or TSA PreCheck credit', k:'Security', per:'4 years', v:120, what:'Up to $120 reimbursed every four years.', where:'Any security checkpoint' },
+    { n:'$200 airline fee credit', k:'Credit', per:'year', v:200, what:'Covers checked bags, seat fees and in-flight purchases on one airline you nominate.', where:'Check-in counter' },
+    { n:'$15 a month in Uber Cash', k:'Ride', per:'year', v:200, what:'Use it on the ride to or from the airport, or on Uber Eats.', where:'Rideshare pickup' }
+  ]},
+  { id:'biz-plat', issuer:'Amex', name:'Business Platinum', fee:895, grants:['centurion','pp-lounge','delta-sky','plaza-premium'], extras:[
+    { n:'CLEAR Plus membership credit', k:'Security', per:'year', v:209, what:'Covers CLEAR Plus in full — skip the ID check and the screening queue.', where:'CLEAR lane at the checkpoint' },
+    { n:'Free Boingo Wi-Fi', k:'Wi-Fi', per:'trip', v:8, what:'Unlimited Boingo hotspot access, which covers Wi-Fi at a lot of US airports.', where:'Airport-wide' },
+    { n:'Global Entry or TSA PreCheck credit', k:'Security', per:'4 years', v:120, what:'Up to $120 reimbursed every four years.', where:'Any security checkpoint' },
+    { n:'$200 airline fee credit', k:'Credit', per:'year', v:200, what:'Covers bags and in-flight purchases on one nominated airline.', where:'Check-in counter' }
+  ]},
+  { id:'amex-gold', issuer:'Amex', name:'Gold', fee:325, grants:[], extras:[
+    { n:'$10 a month in Uber Cash', k:'Ride', per:'year', v:120, what:'Use it on the ride to or from the airport, or on Uber Eats.', where:'Rideshare pickup' }
+  ]},
+  { id:'amex-green', issuer:'Amex', name:'Green', fee:150, grants:[], extras:[
+    { n:'CLEAR Plus membership credit', k:'Security', per:'year', v:209, what:'Covers CLEAR Plus in full — the cheapest card that does.', where:'CLEAR lane at the checkpoint' }
+  ]},
+  { id:'delta-res', issuer:'Amex', name:'Delta SkyMiles Reserve', fee:650, grants:['delta-sky','centurion'], extras:[
+    { n:'First checked bag free on Delta', k:'Bags', per:'trip', v:35, what:'For you and up to eight companions on the same booking.', where:'Check-in counter', airline:'Delta' },
+    { n:'Zone 1 priority boarding on Delta', k:'Boarding', per:'trip', v:0, what:'Board early enough to actually find overhead space.', where:'Your gate', airline:'Delta' },
+    { n:'Global Entry or TSA PreCheck credit', k:'Security', per:'4 years', v:120, what:'Up to $120 reimbursed every four years.', where:'Any security checkpoint' }
+  ]},
+  { id:'delta-plat', issuer:'Amex', name:'Delta SkyMiles Platinum', fee:350, grants:[], extras:[
+    { n:'First checked bag free on Delta', k:'Bags', per:'trip', v:35, what:'For you and up to eight companions on the same booking.', where:'Check-in counter', airline:'Delta' },
+    { n:'Zone 5 priority boarding on Delta', k:'Boarding', per:'trip', v:0, what:'Board ahead of general boarding.', where:'Your gate', airline:'Delta' }
+  ]},
+  { id:'delta-gold', issuer:'Amex', name:'Delta SkyMiles Gold', fee:150, grants:[], extras:[
+    { n:'First checked bag free on Delta', k:'Bags', per:'trip', v:35, what:'For you and up to eight companions on the same booking.', where:'Check-in counter', airline:'Delta' },
+    { n:'Zone 5 priority boarding on Delta', k:'Boarding', per:'trip', v:0, what:'Board ahead of general boarding.', where:'Your gate', airline:'Delta' }
+  ]},
+  { id:'aspire', issuer:'Amex', name:'Hilton Honors Aspire', fee:550, grants:['pp-lounge'], extras:[
+    { n:'$200 airline flight credit', k:'Credit', per:'year', v:200, what:'Covers bags and incidentals on one nominated airline.', where:'Check-in counter' }
+  ]},
+  { id:'brilliant', issuer:'Amex', name:'Marriott Bonvoy Brilliant', fee:650, grants:['pp-lounge'], extras:[
+    { n:'Global Entry or TSA PreCheck credit', k:'Security', per:'4 years', v:120, what:'Up to $120 reimbursed every four years.', where:'Any security checkpoint' }
+  ]},
+
+  /* ---- Capital One ---- */
+  { id:'vx', issuer:'Capital One', name:'Venture X', fee:395, grants:['capone','pp-lounge','plaza-premium'], extras:[
+    { n:'Global Entry or TSA PreCheck credit', k:'Security', per:'4 years', v:120, what:'Up to $120 reimbursed every four years.', where:'Any security checkpoint' },
+    { n:'$300 annual travel credit', k:'Credit', per:'year', v:300, what:'Redeemable through Capital One Travel, which offsets most of the fee.', where:'Booked in advance' }
+  ]},
+  { id:'vx-biz', issuer:'Capital One', name:'Venture X Business', fee:395, grants:['capone','pp-lounge','plaza-premium'], extras:[
+    { n:'Global Entry or TSA PreCheck credit', k:'Security', per:'4 years', v:120, what:'Up to $120 reimbursed every four years.', where:'Any security checkpoint' }
+  ]},
+  { id:'venture', issuer:'Capital One', name:'Venture', fee:95, grants:[], extras:[
+    { n:'Two Capital One Lounge visits a year', k:'Lounge', per:'year', v:180, what:'Two complimentary visits, then a discounted rate after that.', where:'Any Capital One Lounge' },
+    { n:'Global Entry or TSA PreCheck credit', k:'Security', per:'4 years', v:120, what:'Up to $120 reimbursed every four years.', where:'Any security checkpoint' }
+  ]},
+
+  /* ---- Citi ---- */
+  { id:'strata', issuer:'Citi', name:'Strata Elite', fee:595, grants:['pp-lounge','pp-experience','pp-restaurant','admirals'], extras:[
+    { n:'Global Entry or TSA PreCheck credit', k:'Security', per:'4 years', v:120, what:'Up to $120 reimbursed every four years.', where:'Any security checkpoint' }
+  ]},
+  { id:'aa-exec', issuer:'Citi', name:'AAdvantage Executive', fee:595, grants:['admirals'], extras:[
+    { n:'First checked bag free on American', k:'Bags', per:'trip', v:40, what:'For you and up to eight companions on the same booking.', where:'Check-in counter', airline:'American' },
+    { n:'Priority check-in, security and boarding', k:'Security', per:'trip', v:15, what:'Dedicated lanes on American flights.', where:'Check-in and your gate', airline:'American' },
+    { n:'Global Entry or TSA PreCheck credit', k:'Security', per:'4 years', v:120, what:'Up to $120 reimbursed every four years.', where:'Any security checkpoint' }
+  ]},
+  { id:'aa-plat', issuer:'Citi', name:'AAdvantage Platinum Select', fee:99, grants:[], extras:[
+    { n:'First checked bag free on American', k:'Bags', per:'trip', v:40, what:'For you and up to four companions on the same booking.', where:'Check-in counter', airline:'American' },
+    { n:'Preferred boarding on American', k:'Boarding', per:'trip', v:0, what:'Board in Group 5, ahead of general boarding.', where:'Your gate', airline:'American' }
+  ]},
+  { id:'double-cash', issuer:'Citi', name:'Double Cash', fee:0, grants:[], extras:[] },
+
+  /* ---- Other issuers ---- */
+  { id:'boa-elite', issuer:'Other', name:'BofA Premium Rewards Elite', fee:550, grants:['pp-lounge','pp-experience','pp-restaurant'], extras:[
+    { n:'$150 airline incidental credit', k:'Credit', per:'year', v:150, what:'Covers bags, seat fees and in-flight purchases.', where:'Check-in counter' },
+    { n:'Global Entry or TSA PreCheck credit', k:'Security', per:'4 years', v:120, what:'Up to $120 reimbursed every four years.', where:'Any security checkpoint' }
+  ]},
+  { id:'usb-alt', issuer:'Other', name:'U.S. Bank Altitude Reserve', fee:400, grants:['pp-lounge','pp-experience','pp-restaurant'], extras:[
+    { n:'Global Entry or TSA PreCheck credit', k:'Security', per:'4 years', v:120, what:'Up to $120 reimbursed every four years.', where:'Any security checkpoint' }
+  ]},
+  { id:'alaska-sum', issuer:'Other', name:'Alaska Atmos Summit', fee:395, grants:['alaska'], extras:[
+    { n:'Free checked bags on Alaska', k:'Bags', per:'trip', v:35, what:'First bag free for you and up to six companions.', where:'Check-in counter', airline:'Alaska' },
+    { n:'Global Entry or TSA PreCheck credit', k:'Security', per:'4 years', v:120, what:'Up to $120 reimbursed every four years.', where:'Any security checkpoint' }
+  ]},
+  { id:'alaska-visa', issuer:'Other', name:'Alaska Atmos Visa', fee:95, grants:[], extras:[
+    { n:'First checked bag free on Alaska', k:'Bags', per:'trip', v:35, what:'For you and up to six companions on the same booking.', where:'Check-in counter', airline:'Alaska' }
+  ]},
+  { id:'jetblue-plus', issuer:'Other', name:'JetBlue Plus', fee:99, grants:[], extras:[
+    { n:'First checked bag free on JetBlue', k:'Bags', per:'trip', v:35, what:'For you and up to three companions on the same booking.', where:'Check-in counter', airline:'JetBlue' },
+    { n:'Even More Speed security lane', k:'Security', per:'trip', v:15, what:'Expedited security lane where JetBlue offers one.', where:'Security checkpoint', airline:'JetBlue' }
+  ]},
+  { id:'swa-priority', issuer:'Other', name:'Southwest Rapid Rewards Priority', fee:149, grants:[], extras:[
+    { n:'Four upgraded boardings a year', k:'Boarding', per:'year', v:120, what:'A-1 through A-15 positions when available — worth about $30 each.', where:'Your gate', airline:'Southwest' }
+  ]},
+  { id:'bilt', issuer:'Other', name:'Bilt Mastercard', fee:0, grants:[], extras:[] },
+  { id:'discover', issuer:'Other', name:'Discover it', fee:0, grants:[], extras:[] }
+];
+
+/* ============================ AIRLINES → TERMINALS ============================
+   Which terminal you depart from decides which perks are reachable at all.
+   [] means the airline does not serve that airport; a missing key means we
+   have not mapped it yet, which the app says out loud rather than guessing.
+============================================================================= */
+const AIRLINES = {
+  'American':        { JFK:['Terminal 8'], LGA:['Terminal B'], EWR:['Terminal A'], SFO:['Terminal 1'], LAX:['Terminal 4'], DFW:['Terminal A','Terminal B','Terminal C','Terminal D'], DEN:['Concourse C'], PHX:['Terminal 4'], MIA:['Concourse D'], PHL:['Terminal A','Terminal B','Terminal C','Terminal F'], DCA:['Concourse C','Concourse D','Concourse E'], IAD:['Concourse B'] },
+  'Delta':           { JFK:['Terminal 4'], LGA:['Terminal C'], EWR:['Terminal A'], SFO:['Terminal 1'], LAX:['Terminal 3'], DFW:['Terminal E'], DEN:['Concourse A'], PHX:['Terminal 3'], MIA:['Concourse H'], PHL:['Terminal D/E'], DCA:['Concourse B'], IAD:['Concourse B'] },
+  'United':          { JFK:[], LGA:['Terminal B'], EWR:['Terminal C'], SFO:['Terminal 3','International Terminal G'], LAX:['Terminal 7'], DFW:['Terminal E'], DEN:['Concourse B'], PHX:['Terminal 3'], PHL:['Terminal C'], DCA:['Concourse B'], IAD:['Concourse C','Concourse D'] },
+  'JetBlue':         { JFK:['Terminal 5'], LGA:['Terminal B'], EWR:['Terminal A'], SFO:['Terminal 1'], LAX:['Terminal 6'], DFW:[], MIA:['Concourse E'], PHL:['Terminal D/E'], DCA:['Concourse B'] },
+  'Alaska':          { JFK:[], EWR:['Terminal A'], SFO:['Terminal 1'], LAX:['Terminal 6'], DFW:['Terminal E'], DEN:['Concourse A'], PHX:['Terminal 3'], DCA:['Concourse B'] },
+  'Southwest':       { JFK:[], LGA:['Terminal B'], SFO:['Terminal 1'], LAX:['Terminal 1'], DFW:[], DEN:['Concourse C'], PHX:['Terminal 4'], MIA:['Concourse H'], PHL:['Terminal D/E'], DCA:['Concourse B'],
+                       note:{ DFW:'Southwest does not fly from DFW — they use Dallas Love Field (DAL).' } },
+  'British Airways': { JFK:['Terminal 8'], EWR:['Terminal B'], SFO:['International Terminal A'], LAX:['Tom Bradley International'], DFW:['Terminal D'], DEN:['Concourse C'], PHX:['Terminal 4'], MIA:['Concourse E'], PHL:['Terminal A'], IAD:['Concourse B'] },
+  'Air France / KLM':{ JFK:['Terminal 1'], SFO:['International Terminal A'], LAX:['Tom Bradley International'], DFW:['Terminal D'], IAD:['Terminal A'], MIA:['Concourse E'] },
+  'Emirates':        { JFK:['Terminal 4'], EWR:['Terminal B'], SFO:['International Terminal A'], LAX:['Tom Bradley International'], DFW:['Terminal D'], MIA:['Concourse E'], IAD:['Terminal A'] },
+  'Turkish Airlines':{ JFK:['Terminal 1'], EWR:['Terminal B'], SFO:['International Terminal A'], LAX:['Tom Bradley International'], DFW:['Terminal D'], MIA:['Concourse E'], IAD:['Concourse B'] }
+};
+
+/* ============================ INCOME BANDS ============================
+   A rough affordability filter on annual fees. Issuers weigh income alongside
+   credit history, existing relationships and total exposure — this is not an
+   approval prediction.
+======================================================================= */
+const INCOME_BANDS = [
+  { id:'u50',     label:'Under $50k',   maxFee:150,  note:'Filtering to cards under $150 a year. Premium travel cards rarely pay for themselves at this level of flying.' },
+  { id:'50-100',  label:'$50k – $100k', maxFee:450,  note:'Filtering to cards under $450 a year. The $795+ tier is hard to justify unless you fly very often.' },
+  { id:'100-200', label:'$100k – $200k',maxFee:700,  note:'Filtering to cards under $700 a year.' },
+  { id:'200plus', label:'$200k or more',maxFee:9999, note:'No fee ceiling applied — choosing on perks alone.' },
+  { id:'skip',    label:'Rather not say',maxFee:9999,note:'No fee ceiling applied. Set an income band to filter out cards that are out of reach.' }
+];
+
+/* ============================ AIRPORTS ============================ */
+/* `airside` groups terminals you can walk between WITHOUT clearing security again.
+   Terminals in different groups mean exiting and re-screening. Where a connection
+   is uncertain we split the group — being told to reclear when you needn't is a
+   wasted opportunity; the reverse can cost you the flight. */
+const AIRPORTS = {
+  JFK: { city:'New York — Kennedy',  tz:'America/New_York', terminals:['Terminal 1','Terminal 4','Terminal 5','Terminal 8'],
+         airside:[['Terminal 1'],['Terminal 4'],['Terminal 5'],['Terminal 8']] },
+  LGA: { city:'New York — LaGuardia',tz:'America/New_York', terminals:['Terminal B','Terminal C'],
+         airside:[['Terminal B'],['Terminal C']] },
+  EWR: { city:'Newark',              tz:'America/New_York', terminals:['Terminal A','Terminal B','Terminal C'],
+         airside:[['Terminal A'],['Terminal B'],['Terminal C']],
+         note:'A secure-area shuttle links Terminals A and C for Star Alliance connecting passengers only — everyone else has to exit and re-screen.' },
+  SFO: { city:'San Francisco',       tz:'America/Los_Angeles', terminals:['Terminal 1','Terminal 2','Terminal 3','International Terminal A','International Terminal G'],
+         airside:[['Terminal 1','Terminal 2','Terminal 3','International Terminal A','International Terminal G']] },
+  LAX: { city:'Los Angeles',         tz:'America/Los_Angeles', terminals:['Terminal 1','Terminal 3','Terminal 4','Terminal 6','Terminal 7','Tom Bradley International'],
+         airside:[['Terminal 4','Terminal 6','Terminal 7','Tom Bradley International'],['Terminal 1'],['Terminal 3']] },
+  DFW: { city:'Dallas–Fort Worth',   tz:'America/Chicago', terminals:['Terminal A','Terminal B','Terminal C','Terminal D','Terminal E'],
+         airside:[['Terminal A','Terminal B','Terminal C','Terminal D','Terminal E']] },
+  DEN: { city:'Denver',              tz:'America/Denver', terminals:['Concourse A','Concourse B','Concourse C'],
+         airside:[['Concourse A','Concourse B','Concourse C']],
+         note:'Denver has no Priority Pass lounges, restaurants or experiences at all — the only card lounges here are Capital One, Centurion and the airline clubs.' },
+  PHX: { city:'Phoenix',             tz:'America/Phoenix', terminals:['Terminal 3','Terminal 4'],
+         airside:[['Terminal 3'],['Terminal 4']] },
+  MIA: { city:'Miami',               tz:'America/New_York', terminals:['Concourse D','Concourse E','Concourse H','Concourse J'],
+         airside:[['Concourse D','Concourse E','Concourse H','Concourse J']] },
+  PHL: { city:'Philadelphia',        tz:'America/New_York', terminals:['Terminal A','Terminal B','Terminal C','Terminal D/E','Terminal F'],
+         airside:[['Terminal A','Terminal B','Terminal C','Terminal D/E','Terminal F']] },
+  DCA: { city:'Washington — Reagan', tz:'America/New_York', terminals:['Concourse B','Concourse C','Concourse D','Concourse E'],
+         airside:[['Concourse B','Concourse C','Concourse D','Concourse E']],
+         note:'Reagan National has no Priority Pass lounges, restaurants or experiences. Card access here means Capital One, Amex or an airline club.' },
+  IAD: { city:'Washington — Dulles', tz:'America/New_York', terminals:['Main Terminal','Terminal A','Concourse B','Concourse C','Concourse D','Concourse E'],
+         airside:[['Main Terminal','Terminal A','Concourse B','Concourse C','Concourse D','Concourse E']] }
+};
+
+/* Guest rules keyed by issuer + program. 2026 saw big changes here — Capital One
+   dropped free Priority Pass guests, Amex cut Centurion to one guest — so this is
+   exactly the kind of thing people get turned away at the desk for. */
+const GUEST_RULES = {
+  'Chase|pp-lounge':      '2 guests free',
+  'Chase|pp-experience':  '2 guests free',
+  'Chase|sapphire':       '2 guests free',
+  'Chase|united-club':    'Immediate family or 2 guests',
+  'Amex|centurion':       '1 guest free, then $50 each ($30 for kids 2–17). Guest must be on your flight.',
+  'Amex|pp-lounge':       '2 guests free, then $35 each',
+  'Amex|delta-sky':       'Guests $50 each',
+  'Amex|plaza-premium':   '1 guest free',
+  'Capital One|capone':   'Guests $45 each, $25 for kids 2–17 — free guests ended Feb 2026',
+  'Capital One|pp-lounge':'No free guests — $35 each since 2026',
+  'Citi|admirals':        'Immediate family or 2 guests',
+  'Citi|pp-lounge':       '2 guests free',
+  'Citi|pp-experience':   '2 guests free',
+  'Other|pp-lounge':      '2 guests free',
+  'Other|pp-experience':  '2 guests free',
+  'Other|alaska':         'Immediate family or 2 guests'
+};
+
+/* ============================ PERKS ============================
+   requires: access is granted if ANY listed program is held.
+   value:    approximate walk-up / day-pass price, USD.
+=============================================================== */
+const PERKS = [
+  /* ---------------- JFK ---------------- */
+  { a:'JFK', t:'Terminal 1', g:'1',   lvl:'Level 3',            n:'Air France Lounge',         k:'Lounge',    req:['pp-lounge'],     v:50, get:'Hot food, a full bar and showers.', hrs:'Varies by day, from 7am' },
+  { a:'JFK', t:'Terminal 1', g:'5',   lvl:null,                 n:'Be Relax Spa',              k:'Spa',       req:['pp-experience'], v:40, get:'One free massage or aromatherapy treatment.', hrs:'9am–9pm' },
+  { a:'JFK', t:'Terminal 1', g:'3',   lvl:'Level 3',            n:'KAL Lounge',                k:'Lounge',    req:['pp-lounge'],     v:50, get:'Korean Air lounge with snacks, a bar and quiet seating.', hrs:'10:30am–1:50pm, 9:30pm–12:50am' },
+  { a:'JFK', t:'Terminal 1', g:'2',   lvl:null,                 n:'Lufthansa Business Lounge', k:'Lounge',    req:['pp-lounge'],     v:50, get:'Buffet, full bar and showers.', hrs:'Afternoons — closed Fri & Sun' },
+  { a:'JFK', t:'Terminal 1', g:'8',   lvl:null,                 n:'Primeclass Lounge',         k:'Lounge',    req:['pp-lounge'],     v:50, get:'Hot buffet and bar. Priority Pass only — no airline access.', hrs:'11:30am–11:30pm' },
+  { a:'JFK', t:'Terminal 1', g:'2',   lvl:null,                 n:'Turkish Airlines Lounge',   k:'Lounge',    req:['pp-lounge'],     v:60, get:'Widely rated the best lounge at JFK — carved meats, a bakery and a full bar.', hrs:'3am–7am, 9am–12am', flag:'International departures only.' },
+  { a:'JFK', t:'Terminal 1', g:null,  lvl:'Landside, before security', n:'VIP One Lounge',     k:'Lounge',    req:['pp-lounge'],     v:45, get:'Snacks and drinks in a quiet room behind check-in counters E–F.', hrs:'8am–midnight', flag:'Before security — you still have to clear the checkpoint afterwards. International passengers only.' },
+
+  { a:'JFK', t:'Terminal 4', g:'A2',  lvl:'Mezzanine, one level up',  n:'Chase Sapphire Lounge', k:'Lounge',  req:['sapphire'],      v:100, get:'Full restaurant, cocktail bar and wellness rooms.', hrs:'5am–11pm', flag:'Left the Priority Pass network on 15 Aug 2026 — Sapphire cards only now.' },
+  { a:'JFK', t:'Terminal 4', g:'A2',  lvl:'Level 4, above the checkpoint', n:'Centurion Lounge', k:'Lounge',  req:['centurion'],     v:50, get:'Chef-designed menu and a full bar.', hrs:'5am–10pm' },
+  { a:'JFK', t:'Terminal 4', g:null,  lvl:'Retail hall',        n:'Capital One Lounge',        k:'Lounge',    req:['capone'],        v:90, get:'Hot food, a grab-and-go wall, showers and exercise bikes.', hrs:'Open 24 hours' },
+  { a:'JFK', t:'Terminal 4', g:'A8',  lvl:null,                 n:'Delta Sky Club',            k:'Lounge',    req:['delta-sky'],     v:59, get:'Buffet and bar.', hrs:'5am–10:30pm', flag:'Requires a same-day Delta flight.' },
+  { a:'JFK', t:'Terminal 4', g:'B31', lvl:null,                 n:'Delta Sky Club',            k:'Lounge',    req:['delta-sky'],     v:59, get:'Buffet and bar.', hrs:'4:45am–11:30pm', flag:'Requires a same-day Delta flight.' },
+  { a:'JFK', t:'Terminal 4', g:'A2',  lvl:null,                 n:'HelloSky Lounge',           k:'Lounge',    req:['pp-lounge'],     v:50, get:'Hot food and a bar, open around the clock.', hrs:'Open 24 hours' },
+  { a:'JFK', t:'Terminal 4', g:'B39', lvl:null,                 n:'Minute Suites',             k:'Nap suite', req:['pp-experience'], v:65, get:'One free hour in a private suite with a daybed. Showers available.', hrs:'Open 24 hours' },
+  { a:'JFK', t:'Terminal 4', g:'A5',  lvl:null,                 n:'Air India Maharajah Lounge',k:'Lounge',    req:['pp-lounge'],     v:45, get:'Indian buffet and bar.', hrs:'7:15am–9:45pm' },
+  { a:'JFK', t:'Terminal 4', g:'A4',  lvl:null,                 n:'Virgin Atlantic Clubhouse', k:'Lounge',    req:['pp-lounge'],     v:75, get:'Cocktail bar, à la carte dining and showers.', hrs:'Varies with Virgin departures' },
+
+  { a:'JFK', t:'Terminal 5', g:'25',  lvl:null,                 n:'Gameway',                   k:'Gaming',    req:['pp-experience'], v:35, get:'One hour on PS5, Xbox, PC or VR — plus a free drink and a free full-size snack.', hrs:'5am–10pm', flag:'Snacks are full bags and drinks are 20oz bottles — you can take them to go.' },
+  { a:'JFK', t:'Terminal 5', g:'6',   lvl:null,                 n:'Be Relax Spa',              k:'Spa',       req:['pp-experience'], v:40, get:'One free massage or aromatherapy treatment.', hrs:'Tue–Sat 7am–9pm, Sun–Mon 9am–7pm' },
+
+  { a:'JFK', t:'Terminal 8', g:'8',   lvl:null,                 n:'Gameway',                   k:'Gaming',    req:['pp-experience'], v:35, get:'One hour of console or PC gaming, plus a free drink and snack.', hrs:'6am–9pm' },
+  { a:'JFK', t:'Terminal 8', g:'C37', lvl:null,                 n:'Minute Suites',             k:'Nap suite', req:['pp-experience'], v:65, get:'One free hour in a private suite with a daybed. No showers here.', hrs:'Open 24 hours' },
+  { a:'JFK', t:'Terminal 8', g:'42',  lvl:'Level 3, one level up', n:'Admirals Club',          k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and showers.', hrs:'4:15am–10:30pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'JFK', t:'Terminal 8', g:'12',  lvl:null,                 n:"Bobby Van's Steakhouse",    k:'Dining',    req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Sit-down steakhouse.', hrs:'Daily from 6am' },
+
+  /* ---------------- LGA ---------------- */
+  { a:'LGA', t:'Terminal B', g:'20',  lvl:'Ground floor',       n:'Chase Sapphire Lounge',     k:'Lounge',    req:['sapphire','pp-lounge'], v:100, get:'Two floors with a buffet, drink stations, phone booths and a retro arcade.', hrs:'4:30am–9:30pm' },
+  { a:'LGA', t:'Terminal B', g:'20',  lvl:null,                 n:'Capital One Landing',       k:'Lounge',    req:['capone'],        v:90, get:'Full restaurant and bar on the bridge over gates 11–31.', hrs:'5am–10pm' },
+  { a:'LGA', t:'Terminal B', g:'31',  lvl:null,                 n:'Centurion Lounge',          k:'Lounge',    req:['centurion'],     v:50, get:'Chef-designed menu and a full bar.', hrs:'5am–9pm, 8pm Sat' },
+  { a:'LGA', t:'Terminal B', g:'30',  lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and business seating.', hrs:'4:30am–9:30pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'LGA', t:'Terminal B', g:'45',  lvl:null,                 n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5am–8:30pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'LGA', t:'Terminal B', g:'40',  lvl:'Level 3',            n:'Air Canada Maple Leaf Lounge', k:'Lounge', req:['pp-lounge'],     v:50, get:'Hot food and a full bar.', hrs:'5:45am–7:30pm' },
+  { a:'LGA', t:'Terminal B', g:null,  lvl:null,                 n:'Be Relax Spa',              k:'Spa',       req:['pp-experience'], v:45, get:'One free 30-minute massage treatment.', hrs:'8am–8pm' },
+  { a:'LGA', t:'Terminal B', g:null,  lvl:'Level 4, outside security', n:'Minute Suites Express', k:'Nap suite', req:['pp-experience'], v:50, get:'One free hour in a private suite.', hrs:'Open 24 hours', flag:'Outside the secure area in the Bowery Bay Shops — you must reclear security to reach your gate.' },
+  { a:'LGA', t:'Terminal C', g:null,  lvl:'Level 4, enter on level 3', n:'Delta Sky Club',     k:'Lounge',    req:['delta-sky'],     v:59, get:'Buffet, bar and a Sky Deck terrace.', hrs:'5am–9:30pm, 7:30pm Sat', flag:'Requires a same-day Delta flight.' },
+
+  /* ---------------- EWR ---------------- */
+  { a:'EWR', t:'Terminal A', g:'A8',  lvl:'Mezzanine, one level up', n:'Admirals Club',        k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and workspace.', hrs:'4am–7:30pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'EWR', t:'Terminal A', g:'A8',  lvl:null,                 n:'Delta Sky Club',            k:'Lounge',    req:['delta-sky'],     v:59, get:'Buffet and bar.', hrs:'5am–8:15pm', flag:'Requires a same-day Delta flight.' },
+  { a:'EWR', t:'Terminal A', g:'A27', lvl:null,                 n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5am–10pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'EWR', t:'Terminal A', g:'A7',  lvl:null,                 n:'Be Relax Spa',              k:'Spa',       req:['pp-experience'], v:40, get:'One free massage or oxygen treatment.', hrs:'6am–9pm' },
+  { a:'EWR', t:'Terminal A', g:null,  lvl:null,                 n:'Centurion Lounge',          k:'Lounge',    req:['centurion'],     v:50, get:'Chef-designed menu and a full bar.', hrs:'Opening 2026', flag:'Announced but not open yet — listed so you know it is coming.' },
+  { a:'EWR', t:'Terminal B', g:'B60', lvl:null,                 n:'Lufthansa Business Lounge', k:'Lounge',    req:['pp-lounge'],     v:50, get:'Hot buffet, full bar and showers.', hrs:'2:15pm–9:30pm' },
+  { a:'EWR', t:'Terminal C', g:'C74', lvl:null,                 n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5am–10pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'EWR', t:'Terminal C', g:'C123',lvl:null,                 n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5am–10:30pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'EWR', t:'Terminal C', g:'C125',lvl:null,                 n:'Minute Suites',             k:'Nap suite', req:['pp-experience'], v:65, get:'One free hour in a private suite with a daybed.', hrs:'Open 24 hours' },
+
+  /* ---------------- SFO ---------------- */
+  { a:'SFO', t:'Terminal 1', g:'B4',  lvl:null,                 n:'The Club SFO',              k:'Lounge',    req:['pp-lounge'],     v:50, get:'Hot buffet, full bar and showers. The main Priority Pass lounge here.', hrs:'4:30am–11:30pm' },
+  { a:'SFO', t:'Terminal 1', g:'B6',  lvl:null,                 n:'Alaska Lounge',             k:'Lounge',    req:['alaska'],        v:65, get:'Pancake machine, barista bar and local beer on tap.', hrs:'5am–midnight' },
+  { a:'SFO', t:'Terminal 1', g:'B13', lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and showers.', hrs:'4:30am–11:30pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'SFO', t:'Terminal 1', g:'C3',  lvl:null,                 n:'Delta Sky Club',            k:'Lounge',    req:['delta-sky'],     v:59, get:'Buffet and bar.', hrs:'4:30am–midnight', flag:'Requires a same-day Delta flight.' },
+  { a:'SFO', t:'Terminal 2', g:'D12', lvl:null,                 n:'Centurion Lounge',          k:'Lounge',    req:['centurion'],     v:50, get:'Chef-designed menu and a full bar.', hrs:'5am–11pm', flag:'This is the temporary location — the permanent Terminal 3 lounge is closed for renovation until 2027.' },
+  { a:'SFO', t:'Terminal 2', g:'D8',  lvl:null,                 n:'Lark Creek Grill',          k:'Dining',    req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Californian sit-down menu.', hrs:'Daily from 6am' },
+  { a:'SFO', t:'Terminal 3', g:'E4',  lvl:null,                 n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5am–11:30pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'SFO', t:'Terminal 3', g:'F11', lvl:null,                 n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5am–11:30pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'SFO', t:'Terminal 3', g:'E6',  lvl:null,                 n:'San Francisco Giants Clubhouse', k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Ballpark-themed bar and grill.', hrs:'Daily from 6am' },
+  { a:'SFO', t:'Terminal 3', g:'F3',  lvl:null,                 n:'Yankee Pier',               k:'Dining',    req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Seafood and a raw bar.', hrs:'Daily from 6am' },
+  { a:'SFO', t:'International Terminal A', g:'A3', lvl:'Level 4, two levels up', n:'Golden Gate Lounge', k:'Lounge', req:['pp-lounge'], v:50, get:'Hot buffet, bar and shower suites. The best Priority Pass option at SFO.', hrs:'7am–11:30pm' },
+  { a:'SFO', t:'International Terminal A', g:'A2', lvl:'Level 4, two levels up', n:'China Airlines Dynasty Lounge', k:'Lounge', req:['pp-lounge'], v:45, get:'Noodle bar and full bar.', hrs:'8am–8:30pm' },
+  { a:'SFO', t:'International Terminal A', g:'A1', lvl:'Level 4, two levels up', n:'Air India Maharaja Lounge', k:'Lounge', req:['pp-lounge'], v:45, get:'Indian buffet and bar.', hrs:'6am–11:55pm' },
+  { a:'SFO', t:'International Terminal A', g:'A5', lvl:'Level 5, three levels up', n:'Virgin Atlantic Clubhouse', k:'Lounge', req:['pp-lounge'], v:75, get:'Cocktail bar and à la carte dining.', hrs:'9am–11:30pm' },
+  { a:'SFO', t:'International Terminal G', g:'G3', lvl:null,     n:'Mustards Bar & Grill',      k:'Dining',    req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Napa Valley spin-off.', hrs:'Daily from 6am' },
+  { a:'SFO', t:'International Terminal G', g:'G6', lvl:null,     n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'7am–1:15am', flag:'Requires a same-day United or Star Alliance flight.' },
+
+  /* ---------------- LAX ---------------- */
+  { a:'LAX', t:'Terminal 1', g:'12',  lvl:'Level 3, one level up', n:'Be Relax Spa',           k:'Spa',       req:['pp-experience'], v:40, get:'One free massage or aromatherapy treatment.', hrs:'6am–10pm' },
+  { a:'LAX', t:'Terminal 3', g:'30B', lvl:null,                 n:'Gameway',                   k:'Gaming',    req:['pp-experience'], v:35, get:'One hour on PS5, Xbox or PC — plus a free drink and a free full-size snack.', hrs:'5am–10pm' },
+  { a:'LAX', t:'Terminal 3', g:'34',  lvl:'Level 3, one level up', n:'Delta Sky Club',         k:'Lounge',    req:['delta-sky'],     v:59, get:'Buffet, bar and an outdoor terrace.', hrs:'4:15am–12:30am', flag:'Requires a same-day Delta flight.' },
+  { a:'LAX', t:'Terminal 4', g:'42',  lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and showers.', hrs:'4:30am–1am', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'LAX', t:'Terminal 6', g:'65',  lvl:null,                 n:'Gameway',                   k:'Gaming',    req:['pp-experience'], v:35, get:'One hour of console or PC gaming, plus a free drink and snack.', hrs:'6am–10pm' },
+  { a:'LAX', t:'Terminal 6', g:'65A', lvl:null,                 n:'Air Canada Maple Leaf Lounge', k:'Lounge', req:['pp-lounge'],     v:50, get:'Hot food and a full bar. One of the few real lounges outside Tom Bradley.', hrs:'5am–10pm' },
+  { a:'LAX', t:'Terminal 6', g:'64',  lvl:'Mezzanine, one level up', n:'Alaska Lounge',        k:'Lounge',    req:['alaska'],        v:65, get:'Pancake machine and barista bar.', hrs:'5am–11pm' },
+  { a:'LAX', t:'Terminal 7', g:'71A', lvl:'Level 3, one level up', n:'United Club',            k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'4:30am–11:45pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'LAX', t:'Tom Bradley International', g:'150', lvl:null,   n:'Centurion Lounge',          k:'Lounge',    req:['centurion'],     v:50, get:'Chef-designed menu and a full bar. Open to Amex cardholders on any airline.', hrs:'6am–10pm' },
+  { a:'LAX', t:'Tom Bradley International', g:'150', lvl:'Level 4, two levels up', n:'Be Relax Spa', k:'Spa',  req:['pp-experience'], v:40, get:'One free massage or aromatherapy treatment.', hrs:'9am–9pm' },
+  { a:'LAX', t:'Tom Bradley International', g:'155', lvl:'Level 6, four levels up', n:'Star Alliance Lounge', k:'Lounge', req:['pp-lounge'], v:60, get:'Hot buffet, full bar and an outdoor terrace over the airfield.', hrs:'8:30am–1am' },
+  { a:'LAX', t:'Tom Bradley International', g:'201', lvl:null,   n:'Air France Lounge',         k:'Lounge',    req:['pp-lounge'],     v:50, get:'Buffet, bar and showers.', hrs:'9am–11:30pm' },
+  { a:'LAX', t:'Tom Bradley International', g:'148', lvl:null,   n:'Chase Sapphire Lounge',     k:'Lounge',    req:['sapphire'],      v:100, get:'Full restaurant, cocktail bar and wellness suites.', hrs:'Opening late 2026', flag:'Under construction — not open yet. Listed so you know it is coming.' },
+
+  /* ---------------- DFW ---------------- */
+  { a:'DFW', t:'Terminal A', g:'A24', lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and showers.', hrs:'4am–10:15pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'DFW', t:'Terminal A', g:'A38', lvl:null,                 n:'Minute Suites',             k:'Nap suite', req:['pp-experience'], v:65, get:'One free hour in a private suite with a daybed.', hrs:'Open 24 hours' },
+  { a:'DFW', t:'Terminal B', g:'B42', lvl:null,                 n:'Gameway',                   k:'Gaming',    req:['pp-experience'], v:35, get:'One hour on PS5, Xbox or PC — plus a free drink and a free full-size snack.', hrs:'6am–9pm' },
+  { a:'DFW', t:'Terminal B', g:'B28', lvl:null,                 n:'Be Relax Spa',              k:'Spa',       req:['pp-experience'], v:40, get:'One free treatment, once per same-day boarding pass.', hrs:'8am–10pm' },
+  { a:'DFW', t:'Terminal B', g:'B3',  lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and showers.', hrs:'5:30am–10:15pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'DFW', t:'Terminal C', g:'C20', lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and showers.', hrs:'5am–10:15pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'DFW', t:'Terminal D', g:'D22', lvl:null,                 n:'Capital One Lounge',        k:'Lounge',    req:['capone'],        v:90, get:'Full restaurant, grab-and-go wall, showers and a wellness room.', hrs:'5am–10pm' },
+  { a:'DFW', t:'Terminal D', g:'D12', lvl:null,                 n:'Centurion Lounge',          k:'Lounge',    req:['centurion'],     v:50, get:'Chef-designed menu and a full bar.', hrs:'5:30am–10pm' },
+  { a:'DFW', t:'Terminal D', g:'D25', lvl:null,                 n:'Chase Sapphire Lounge',     k:'Lounge',    req:['sapphire','pp-lounge'], v:100, get:'Full restaurant, cocktail bar and wellness suites.', hrs:'5am–10pm', flag:'Priority Pass members get one visit a year here — Sapphire cardholders get unlimited access.' },
+  { a:'DFW', t:'Terminal D', g:'D27', lvl:'Mezzanine, one level up', n:'The Club DFW',         k:'Lounge',    req:['pp-lounge'],     v:50, get:'Buffet and bar.', hrs:'4am–10:30pm', flag:'Enter up to 3 hours before departure.' },
+  { a:'DFW', t:'Terminal D', g:'D15', lvl:null,                 n:'Plaza Premium Lounge',      k:'Lounge',    req:['pp-lounge','plaza-premium'], v:55, get:'Hot buffet and showers.', hrs:'7am–11pm' },
+  { a:'DFW', t:'Terminal D', g:'D15', lvl:null,                 n:'Plaza Premium First',       k:'Lounge',    req:['pp-lounge'],     v:65, get:'The upgraded sibling — à la carte dining and private suites.', hrs:'7am–10pm' },
+  { a:'DFW', t:'Terminal D', g:'D21', lvl:null,                 n:'Be Relax Spa',              k:'Spa',       req:['pp-experience'], v:40, get:'One free massage or aromatherapy treatment.', hrs:'8am–10pm' },
+  { a:'DFW', t:'Terminal D', g:'D23', lvl:null,                 n:'Minute Suites',             k:'Nap suite', req:['pp-experience'], v:65, get:'One free hour in a private suite with a daybed.', hrs:'Open 24 hours' },
+  { a:'DFW', t:'Terminal D', g:'D24', lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and showers.', hrs:'5am–10:15pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'DFW', t:'Terminal E', g:'E16', lvl:null,                 n:'Gameway',                   k:'Gaming',    req:['pp-experience'], v:35, get:'One hour of console or PC gaming, plus a free drink and snack.', hrs:'5am–8pm' },
+  { a:'DFW', t:'Terminal E', g:'E10', lvl:null,                 n:'Delta Sky Club',            k:'Lounge',    req:['delta-sky'],     v:59, get:'Buffet and bar.', hrs:'4:15am–7pm', flag:'Requires a same-day Delta flight.' },
+  { a:'DFW', t:'Terminal E', g:'E6',  lvl:null,                 n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'4:30am–7:45pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'DFW', t:'Terminal E', g:'E31', lvl:null,                 n:'Plaza Premium Lounge',      k:'Lounge',    req:['pp-lounge'],     v:55, get:'Hot buffet and bar.', hrs:'6am–8pm', flag:'Two-hour maximum stay for Priority Pass members.' },
+  { a:'DFW', t:'Terminal E', g:'E15', lvl:'Mezzanine, one level up', n:'Admirals Club',        k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and showers.', hrs:'6am–10:15pm', flag:'Requires a same-day American or Oneworld flight.' },
+
+  /* ---------------- DEN ---------------- */
+  { a:'DEN', t:'Concourse A', g:'A34', lvl:'Mezzanine, one level up', n:'Capital One Lounge',  k:'Lounge',    req:['capone'],        v:90, get:'Full restaurant, grab-and-go wall, showers and a wellness room.', hrs:'5am–9pm' },
+  { a:'DEN', t:'Concourse A', g:'A38', lvl:'Level 4, two levels up', n:'Delta Sky Club',       k:'Lounge',    req:['delta-sky'],     v:59, get:'Buffet, bar and an outdoor sky deck.', hrs:'4:30am–12:15am', flag:'Requires a same-day Delta flight.' },
+  { a:'DEN', t:'Concourse A', g:'A25', lvl:null,                n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5am–8:30pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'DEN', t:'Concourse B', g:'B32', lvl:null,                n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5:30am–9pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'DEN', t:'Concourse B', g:'B44', lvl:null,                n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5:30am–9pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'DEN', t:'Concourse B', g:'B60', lvl:null,                n:'United Club Fly',           k:'Lounge',    req:['united-club'],   v:45, get:'A smaller grab-and-go club. No guests permitted.', hrs:'7am–7pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'DEN', t:'Concourse C', g:'C46', lvl:'Mezzanine, one level up', n:'Centurion Lounge',    k:'Lounge',    req:['centurion'],     v:50, get:'Chef-designed menu and a full bar.', hrs:'5am–10pm' },
+  { a:'DEN', t:'Concourse C', g:'C32', lvl:'Mezzanine, one level up', n:'Admirals Club',       k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and workspace.', hrs:'4:30am–11:30pm', flag:'Requires a same-day American or Oneworld flight.' },
+
+  /* ---------------- PHX ---------------- */
+  { a:'PHX', t:'Terminal 4', g:'D11', lvl:null,                 n:'Chase Sapphire Lounge',     k:'Lounge',    req:['sapphire','pp-lounge'], v:100, get:'An Airstream food truck, full-service bar and an indoor terrace.', hrs:'4:30am–10:30pm' },
+  { a:'PHX', t:'Terminal 4', g:'B22', lvl:'Upper level, one level up', n:'Centurion Lounge',   k:'Lounge',    req:['centurion'],     v:50, get:'Chef-designed menu and a full bar.', hrs:'6am–9pm' },
+  { a:'PHX', t:'Terminal 4', g:'B22', lvl:null,                 n:'Escape Lounge',             k:'Lounge',    req:['pp-lounge','centurion'], v:45, get:'Hot food, bar and quiet seating.', hrs:'5am–10pm' },
+  { a:'PHX', t:'Terminal 4', g:'A7',  lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and showers.', hrs:'5:30am–11:30pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'PHX', t:'Terminal 4', g:'A19', lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and workspace.', hrs:'3:30am–9pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'PHX', t:'Terminal 4', g:'B5',  lvl:null,                 n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and workspace.', hrs:'5:30am–9pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'PHX', t:'Terminal 3', g:'E5',  lvl:null,                 n:'Escape Lounge',             k:'Lounge',    req:['pp-lounge','centurion'], v:45, get:'Hot food, bar and quiet seating.', hrs:'4:30am–10pm' },
+  { a:'PHX', t:'Terminal 3', g:'F8',  lvl:null,                 n:'Delta Sky Club',            k:'Lounge',    req:['delta-sky'],     v:59, get:'Buffet and bar.', hrs:'4:45am–11:15pm', flag:'Requires a same-day Delta flight.' },
+  { a:'PHX', t:'Terminal 3', g:'E3',  lvl:null,                 n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5am–11pm', flag:'Requires a same-day United or Star Alliance flight.' },
+
+  /* ---------------- MIA ---------------- */
+  { a:'MIA', t:'Concourse D', g:'D12', lvl:'Level 4, two levels up', n:'Centurion Lounge',     k:'Lounge',    req:['centurion'],     v:50, get:'Chef-designed menu and a full bar.', hrs:'5am–10pm' },
+  { a:'MIA', t:'Concourse D', g:'D15', lvl:null,                n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and showers.', hrs:'5:30am–10:30pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'MIA', t:'Concourse D', g:'D30', lvl:null,                n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and showers.', hrs:'5am–10:30pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'MIA', t:'Concourse D', g:'D11', lvl:null,                n:'XpresSpa',                  k:'Spa',       req:['pp-experience'], v:30, get:'25 free minutes in a massage chair or on wellness equipment.', hrs:'8am–8pm' },
+  { a:'MIA', t:'Concourse E', g:'E20', lvl:'Level 2',           n:'Turkish Airlines Lounge',   k:'Lounge',    req:['pp-lounge'],     v:55, get:'Carved meats, a bakery and a full bar.', hrs:'5am–10pm', flag:'Three-hour maximum stay. Members must be 21 or over.' },
+  { a:'MIA', t:'Concourse H', g:'H10', lvl:'Level 3, one level up', n:'Turkish Airlines Lounge', k:'Lounge',  req:['pp-lounge'],     v:55, get:'Carved meats, a bakery and a full bar.', hrs:'Open 24 hours', flag:'Three-hour maximum stay.' },
+  { a:'MIA', t:'Concourse H', g:'H14', lvl:null,                n:'Delta Sky Club',            k:'Lounge',    req:['delta-sky'],     v:59, get:'Buffet and bar.', hrs:'4:45am–8:45pm', flag:'Requires a same-day Delta flight.' },
+  { a:'MIA', t:'Concourse J', g:'J6',  lvl:null,                n:'Avianca & TAP Portugal Lounge', k:'Lounge', req:['pp-lounge'],    v:48, get:'Hot buffet and bar.', hrs:'Open 24 hours', flag:'Three-hour maximum stay.' },
+
+  /* ---------------- PHL ---------------- */
+  { a:'PHL', t:'Terminal A', g:'A14', lvl:null,                 n:'Centurion Lounge',          k:'Lounge',    req:['centurion'],     v:50, get:'Full bar, day beds, showers and a family room.', hrs:'5:30am–9pm' },
+  { a:'PHL', t:'Terminal A', g:'A15', lvl:'Mezzanine, one level up', n:'Admirals Club',        k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, full bar and showers.', hrs:'5am–10pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'PHL', t:'Terminal B', g:'B2',  lvl:null,                 n:'XpresSpa',                  k:'Spa',       req:['pp-experience'], v:30, get:'Free access to a zero-gravity massage chair or body lounger.', hrs:'7am–9pm' },
+  { a:'PHL', t:'Terminal B', g:'B10', lvl:null,                 n:'Minute Suites',             k:'Nap suite', req:['pp-experience'], v:65, get:'One free hour in a private suite with a daybed. Showers available.', hrs:'Open 24 hours' },
+  { a:'PHL', t:'Terminal B', g:'B14', lvl:'Level 3, two levels up', n:'Admirals Club',         k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and workspace.', hrs:'4:30am–10pm', flag:'In the B/C connector. Requires a same-day American or Oneworld flight.' },
+  { a:'PHL', t:'Terminal C', g:'C20', lvl:'Level 2, one level up', n:'United Club',            k:'Lounge',    req:['united-club'],   v:59, get:'Bar, coffee station and snacks.', hrs:'5am–6pm', flag:'In the C/D connector. Requires a same-day United or Star Alliance flight.' },
+  { a:'PHL', t:'Terminal D/E', g:'D5', lvl:'Level 2, one level up', n:'Chase Sapphire Lounge', k:'Lounge',    req:['sapphire'],      v:100, get:'Curated dining, wellness pods, a game room and a beer garden.', hrs:'5am–10pm' },
+  { a:'PHL', t:'Terminal D/E', g:'D5', lvl:'Level 2, one level up', n:'Delta Sky Club',        k:'Lounge',    req:['delta-sky'],     v:59, get:'Self-serve bar and buffet.', hrs:'4:30am–6:30pm', flag:'Requires a same-day Delta flight.' },
+  { a:'PHL', t:'Terminal F', g:'F14', lvl:'Level 2, one level up', n:'Admirals Club',          k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and workspace.', hrs:'6:30am–9pm', flag:'Requires a same-day American or Oneworld flight.' },
+
+  /* ---------------- DCA ---------------- */
+  { a:'DCA', t:'Concourse B', g:'B15', lvl:'Level 2, one level up', n:'Centurion Lounge',      k:'Lounge',    req:['centurion'],     v:50, get:'Chef-designed menu and a full bar.', hrs:'6am–9pm, 5am–7pm Sat' },
+  { a:'DCA', t:'Concourse B', g:'B15', lvl:'One level up',      n:'Delta Sky Club',            k:'Lounge',    req:['delta-sky'],     v:59, get:'Buffet, bar and a rooftop terrace.', hrs:'5am–9:30pm, 7pm Sat', flag:'Requires a same-day Delta flight.' },
+  { a:'DCA', t:'Concourse B', g:'B11', lvl:null,                n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5:30am–7:30pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'DCA', t:'Concourse D', g:'D22', lvl:null,                n:'Capital One Landing',       k:'Lounge',    req:['capone'],        v:90, get:'A José Andrés-designed menu, full bar and grab-and-go wall.', hrs:'6am–9pm' },
+  { a:'DCA', t:'Concourse C', g:'C24', lvl:null,                n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and workspace.', hrs:'4:15am–10:15pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'DCA', t:'Concourse D', g:'D36', lvl:null,                n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and workspace.', hrs:'4:15am–8:15pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'DCA', t:'Concourse E', g:'E46', lvl:null,                n:'Admirals Club',             k:'Lounge',    req:['admirals'],      v:79, get:'Buffet, bar and workspace. The best of the three at DCA.', hrs:'4:15am–10:15pm', flag:'Requires a same-day American or Oneworld flight.' },
+
+  /* ---------------- IAD ---------------- */
+  { a:'IAD', t:'Main Terminal', g:null, lvl:'Just past the checkpoint', n:'Capital One Lounge', k:'Lounge',   req:['capone'],        v:90, get:'Full restaurant, grab-and-go wall, showers and a wellness room.', hrs:'5:30am–9pm' },
+  { a:'IAD', t:'Terminal A', g:'A14', lvl:null,                 n:'Etihad Lounge',             k:'Lounge',    req:['sapphire','pp-lounge'], v:60, get:'Hot buffet, full bar and shower suites.', hrs:'6am–10pm', flag:'Priority Pass members get one free visit a year, then $75 per visit. Sapphire cardholders enter free.' },
+  { a:'IAD', t:'Terminal A', g:'A20', lvl:null,                 n:'Air France–KLM Lounge',     k:'Lounge',    req:['pp-lounge'],     v:50, get:'Buffet, bar and showers.', hrs:'7:30am–9pm' },
+  { a:'IAD', t:'Terminal A', g:'A32', lvl:null,                 n:'Virgin Atlantic Clubhouse', k:'Lounge',    req:['pp-lounge','centurion'], v:75, get:'Cocktail bar, à la carte dining and showers.', hrs:'Opens 4 hours before Virgin departures' },
+  { a:'IAD', t:'Concourse B', g:'B43', lvl:null,                n:'Turkish Airlines Lounge',   k:'Lounge',    req:['pp-lounge'],     v:55, get:'Carved meats, a bakery and a full bar. One of the best lounges in the US.', hrs:'7:15am–9:15pm' },
+  { a:'IAD', t:'Concourse B', g:'B50', lvl:null,                n:'British Airways Galleries', k:'Lounge',    req:['pp-lounge'],     v:50, get:'Hot and cold buffet, wine and coffee.', hrs:'2:30pm–10:30pm' },
+  { a:'IAD', t:'Concourse C', g:'C7',  lvl:null,                n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5:30am–10pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'IAD', t:'Concourse C', g:'C17', lvl:null,                n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5:30am–10pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'IAD', t:'Concourse C', g:'C14', lvl:null,                n:"Chef Geoff's",              k:'Dining',    req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. American sit-down menu.', hrs:'Daily from 7am' },
+  { a:'IAD', t:'Concourse D', g:'D8',  lvl:null,                n:'United Club',               k:'Lounge',    req:['united-club'],   v:59, get:'Snacks, bar and workspace.', hrs:'5:30am–10pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'IAD', t:'Concourse E', g:'E9',  lvl:null,                n:'Gameway',                   k:'Gaming',    req:['pp-experience'], v:35, get:'One hour of console or PC gaming, plus a free drink and snack.', hrs:'Opening soon', flag:'Announced for Concourse E — confirm it has opened before you count on it.' },
+
+  /* ---------------- USO (requires a DoD ID) ---------------- */
+  { a:'SFO', t:'Terminal 1', g:'20', lvl:'Mezzanine, one level up', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Free food, drinks, Wi-Fi and quiet seating.', hrs:'7am–8pm' },
+  { a:'DFW', t:'Terminal B', g:'B47', lvl:null,                     n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Free food, drinks, Wi-Fi and quiet seating.', hrs:'8am–10:30pm' },
+  { a:'DEN', t:'Concourse A', g:null, lvl:'Level 4, two levels up', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Free food, drinks, Wi-Fi and quiet seating.', hrs:'7am–7pm' },
+  { a:'PHL', t:'Terminal D/E', g:'E2', lvl:null,                    n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Free food, drinks, Wi-Fi, gaming and a children’s room.', hrs:'6am–6pm' },
+  { a:'LAX', t:'Terminal 1', g:null, lvl:'Landside, outside security', n:'Bob Hope Hollywood USO', k:'Military', req:['military'], v:50, get:'Free food, drinks, Wi-Fi, showers and bunk rooms.', hrs:'7am–9pm', flag:'On the arrivals level between Terminals 1 and 2, outside security — you would have to re-screen afterwards.' },
+  { a:'PHX', t:'Terminal 4', g:null, lvl:'Landside, outside security', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Free food, drinks, Wi-Fi and quiet seating.', hrs:'7am–7pm', flag:'On level 2 outside security — you would have to re-screen afterwards.' },
+  { a:'DCA', t:'Concourse B', g:null, lvl:'Landside, outside security', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Free food, drinks, Wi-Fi and quiet seating.', hrs:'6am–6pm', flag:'In Terminal 1 outside security — you would have to re-screen afterwards.' },
+  { a:'IAD', t:'Main Terminal', g:null, lvl:'Arrivals level, outside security', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Free food, drinks, Wi-Fi, family areas and sleeping quarters.', hrs:'Varies — check the USO app', flag:'On the arrivals level outside security — you would have to re-screen afterwards.' },
+  { a:'JFK', t:'Terminal 5', g:null, lvl:'Landside, outside security', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Free food, drinks, Wi-Fi and quiet seating.', hrs:'9am–2pm', flag:'Temporarily closed. Sits outside security across from baggage carousel 3.' }
+];
+
+/* ============================ STATE ============================ */
+const DEFAULTS = {
+  cards:['csr'], dod:false,
+  legs: { from:{ airport:'JFK', terminal:'', gate:'', flight:'' }, via:null },
+  slot: 'from',
+  tab:'now', home:['JFK'], airline:'American', income:'skip'
+};
+let state = load();
+
+function load() {
+  const base = JSON.parse(JSON.stringify(DEFAULTS));
+  try {
+    const raw = localStorage.getItem('layover.state');
+    if (raw) {
+      const s = Object.assign(base, JSON.parse(raw));
+      if (!s.legs || !s.legs.from) s.legs = JSON.parse(JSON.stringify(DEFAULTS.legs));
+      if (s.slot === 'via' && !s.legs.via) s.slot = 'from';
+      return s;
+    }
+  } catch (e) { /* private mode / blocked storage — fall through */ }
+  return base;
+}
+function save() {
+  try { localStorage.setItem('layover.state', JSON.stringify(state)); } catch (e) { /* non-fatal */ }
+}
+
+/* The leg currently being viewed. Each stop keeps its own terminal and gate. */
+function leg() { return state.legs[state.slot] || state.legs.from; }
+
+/* ============================ HELPERS ============================ */
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function gateNum(g) {
+  if (!g) return null;
+  const m = String(g).match(/(\d+)/);
+  return m ? parseInt(m[1], 10) : null;
+}
+
+function heldPrograms() {
+  const set = new Set();
+  CARDS.filter(c => state.cards.includes(c.id)).forEach(c => c.grants.forEach(p => set.add(p)));
+  if (state.dod) set.add('military');
+  return set;
+}
+
+function cardsGranting(program) {
+  return CARDS.filter(c => state.cards.includes(c.id) && c.grants.includes(program));
+}
+
+/* Minutes since midnight, in the airport's own timezone rather than the phone's. */
+function airportNow() {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: AIRPORTS[leg().airport].tz, hour: 'numeric', minute: 'numeric', hour12: false
+  }).formatToParts(new Date());
+  const h = +parts.find(p => p.type === 'hour').value % 24;
+  const m = +parts.find(p => p.type === 'minute').value;
+  return h * 60 + m;
+}
+
+/* Reads the common "5am–10pm" shapes. Anything irregular returns null and the
+   venue simply shows its raw hours with no badge, rather than a wrong one. */
+function parseHours(str) {
+  if (!str) return null;
+  if (/24 hours/i.test(str)) return { always: true };
+  const m = str.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)\s*[–—-]\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i);
+  if (!m) return null;
+  const to24 = (h, mi, ap) => (+h % 12 + (/pm/i.test(ap) ? 12 : 0)) * 60 + (+mi || 0);
+  return { open: to24(m[1], m[2], m[3]), close: to24(m[4], m[5], m[6]) };
+}
+
+function openStatus(p) {
+  const h = parseHours(p.hrs);
+  if (!h) return null;
+  if (h.always) return { state: 'open', label: 'Open 24h' };
+
+  const now = airportNow();
+  const wraps = h.close <= h.open;
+  const isOpen = wraps ? (now >= h.open || now < h.close) : (now >= h.open && now < h.close);
+
+  if (isOpen) {
+    let left = h.close - now;
+    if (left < 0) left += 1440;
+    return left <= 45
+      ? { state: 'soon', label: `Closes in ${left} min` }
+      : { state: 'open', label: 'Open now' };
+  }
+
+  let until = h.open - now;
+  if (until < 0) until += 1440;
+  return until <= 90
+    ? { state: 'closed', label: `Opens in ${until} min` }
+    : { state: 'closed', label: 'Closed now' };
+}
+
+/* Can you walk there without clearing security again? */
+function reachability(term) {
+  if (!leg().terminal || term === leg().terminal) return null;
+  const group = (AIRPORTS[leg().airport].airside || []).find(g => g.includes(leg().terminal));
+  if (!group) return null;
+  return group.includes(term)
+    ? { ok: true,  label: 'Walk there without leaving security' }
+    : { ok: false, label: 'You would have to exit and re-screen' };
+}
+
+function guestRule(card, program) {
+  return GUEST_RULES[`${card.issuer}|${program}`] || null;
+}
+
+/* "AA 2419" / "dl1234" → the airline, so we can infer the terminal for free. */
+const FLIGHT_CODES = {
+  AA:'American', DL:'Delta', UA:'United', B6:'JetBlue', AS:'Alaska', WN:'Southwest',
+  BA:'British Airways', AF:'Air France / KLM', KL:'Air France / KLM', EK:'Emirates', TK:'Turkish Airlines'
+};
+function airlineFromFlight(str) {
+  const m = String(str || '').trim().match(/^([A-Za-z]{2})\s*\d{1,4}$/);
+  return m ? FLIGHT_CODES[m[1].toUpperCase()] || null : null;
+}
+
+/* Explains the Priority Pass tier trap when it is the reason for a lock. */
+function lockReason(perk, held) {
+  const wantsExp  = perk.req.includes('pp-experience');
+  const wantsRest = perk.req.includes('pp-restaurant');
+  if ((wantsExp || wantsRest) && held.has('pp-lounge')) {
+    const issuers = [...new Set(cardsGranting('pp-lounge').map(c => c.issuer))];
+    const kind = wantsExp ? 'non-lounge experiences' : 'restaurant credits';
+    return `Your Priority Pass comes from ${issuers.join(' and ')} — that version covers lounges only, not ${kind}.`;
+  }
+  return null;
+}
+
+/* ============================ RENDER ============================ */
+function render() {
+  const held = heldPrograms();
+  const airport = AIRPORTS[leg().airport];
+  const all = PERKS.filter(p => p.a === leg().airport);
+
+  const unlocked = [], locked = [];
+  all.forEach(p => (p.req.some(r => held.has(r)) ? unlocked : locked).push(p));
+
+  renderTrip();
+  renderContext();
+  applyFlight(false);
+  renderTerminalPicker(airport);
+  renderWallet();
+  renderMilitaryNote();
+  renderSummary(unlocked, locked);
+  renderResults(unlocked, held);
+  renderDeadCards();
+  renderLocked(locked, held);
+
+  const money = "Dollar figures are what you'd pay at the door without the card — day-pass rates for lounges, menu price for a spa treatment or a gaming hour.";
+  document.getElementById('airportNote').innerHTML =
+    esc(money) + (airport.note ? ` <b>${esc(airport.note)}</b>` : '');
+
+  renderPlanControls();
+  renderPlan();
+  renderTabs();
+  save();
+}
+
+function renderTabs() {
+  ['now', 'plan'].forEach(id => {
+    const on = state.tab === id;
+    document.getElementById('tab-' + id).setAttribute('aria-selected', String(on));
+    document.getElementById('panel-' + id).hidden = !on;
+  });
+}
+
+/* The strip is the only place airports are chosen — each stop carries its own
+   picker, so there is no second list elsewhere saying the same thing. */
+function renderTrip() {
+  const el = document.getElementById('trip');
+  const codes = Object.keys(AIRPORTS);
+
+  const stop = (slot, role) => {
+    const taken = slot === 'from' ? (state.legs.via && state.legs.via.airport) : state.legs.from.airport;
+    const opts = codes.map(c =>
+      `<option value="${c}"${c === state.legs[slot].airport ? ' selected' : ''}${c === taken ? ' disabled' : ''}>${c}</option>`
+    ).join('');
+    return `
+      <div class="stop${state.slot === slot ? ' is-active' : ''}" data-slot="${slot}">
+        <span class="stop-role">${role}</span>
+        <select class="stop-sel" data-sel="${slot}" aria-label="${role} airport">${opts}</select>
+      </div>`;
+  };
+
+  el.innerHTML = stop('from', 'Departing')
+    + '<span class="trip-arrow" aria-hidden="true">&rarr;</span>'
+    + (state.legs.via
+        ? stop('via', 'Connecting') + '<button class="stop-drop" data-drop="via" aria-label="Remove connection">&times;</button>'
+        : '<button class="stop is-add" data-add="via">+ Add a connection</button>');
+}
+
+/* Derives the terminal from the flight number. Runs on every render, so a flight
+   restored from a previous session fills in too — not just one typed just now.
+   `force` is for a freshly typed number; otherwise a terminal you picked by hand
+   is left alone. */
+function applyFlight(force) {
+  const hint = document.getElementById('flightHint');
+  const l = leg();
+  const raw = (l.flight || '').trim();
+
+  if (!raw) { hint.textContent = ''; return; }
+
+  const airline = airlineFromFlight(raw);
+  if (!airline) {
+    hint.textContent = "That airline code isn't one we know — set your terminal below instead.";
+    return;
+  }
+
+  const terms = terminalsFor(airline, l.airport);
+  if (!terms) {
+    hint.textContent = `${airline} — we haven't mapped their terminal at ${l.airport} yet, so set it below.`;
+    return;
+  }
+  if (!terms.length) {
+    hint.textContent = `${airline} doesn't fly from ${l.airport}.`;
+    return;
+  }
+
+  if (force || !l.terminal) l.terminal = terms[0];
+
+  hint.textContent = terms.length > 1
+    ? `${airline} — ${l.terminal}. They also use ${terms.filter(t => t !== l.terminal).join(', ')}, so change it below if you're elsewhere.`
+    : `${airline} — ${terms[0]}.`;
+}
+
+/* Sticky bar so the airport stays unmistakable while scrolling past terminals
+   that all look alike — especially once a connection is in play. */
+function renderContext() {
+  const el = document.getElementById('context');
+  const a = AIRPORTS[leg().airport];
+  const onTrip = !!state.legs.via;
+
+  el.className = 'context' + (onTrip && state.slot === 'via' ? ' is-via' : '');
+  el.innerHTML = `
+    ${onTrip ? `<span class="ctx-role">${state.slot === 'via' ? 'Connecting in' : 'Departing'}</span>` : ''}
+    <span class="ctx-code">${esc(leg().airport)}</span>
+    <span class="ctx-city">${esc(a.city)}</span>
+    ${leg().terminal ? `<span class="ctx-term">${esc(leg().terminal)}</span>` : ''}`;
+}
+
+/* Airline military baggage rules, keyed off the flight number when we have one. */
+function renderMilitaryNote() {
+  const el = document.getElementById('milNote');
+  if (!state.dod) { el.innerHTML = ''; return; }
+  const airline = airlineFromFlight(leg().flight);
+  const rule = airline && MILITARY_AIRLINE[airline];
+  el.innerHTML = rule
+    ? `<b>${esc(airline)} military baggage:</b> ${esc(rule)}`
+    : `<b>Airline benefits:</b> most US carriers allow 2&ndash;5 free checked bags on orders and early boarding with a military ID. Add a flight number above for your airline's specific rule.`;
+}
+
+
+function renderTerminalPicker(airport) {
+  const sel = document.getElementById('terminal');
+  sel.innerHTML = `<option value="">Not sure yet</option>` +
+    airport.terminals.map(t => `<option value="${esc(t)}"${t === leg().terminal ? ' selected' : ''}>${esc(t)}</option>`).join('');
+  // Don't clobber a field the user is mid-way through typing into.
+  const gate = document.getElementById('gate');
+  if (document.activeElement !== gate) gate.value = leg().gate;
+  const flight = document.getElementById('flight');
+  if (document.activeElement !== flight) flight.value = leg().flight || '';
+  if (!leg().flight) document.getElementById('flightHint').textContent = '';
+}
+
+function renderWallet() {
+  const issuers = [...new Set(CARDS.map(c => c.issuer))];
+  document.getElementById('walletBody').innerHTML = issuers.map(iss => `
+    <div class="issuer-group">
+      <div class="issuer-name">${esc(iss)}</div>
+      ${CARDS.filter(c => c.issuer === iss).map(c => `
+        <label class="card-opt">
+          <input type="checkbox" data-card="${c.id}"${state.cards.includes(c.id) ? ' checked' : ''}>
+          <span>${esc(c.name)}</span>
+        </label>`).join('')}
+    </div>`).join('');
+
+  const n = state.cards.length;
+  document.getElementById('walletCount').textContent = n === 1 ? '1 selected' : `${n} selected`;
+  document.getElementById('dod').checked = !!state.dod;
+}
+
+function renderSummary(unlocked, locked) {
+  const worth = unlocked.reduce((s, p) => s + p.v, 0);
+  const terminals = new Set(unlocked.map(p => p.t)).size;
+  document.getElementById('summary').innerHTML = `
+    <div><span class="stat-n is-accent">${unlocked.length}</span><span class="stat-l">Perks unlocked</span></div>
+    <div><span class="stat-n">$${worth}</span><span class="stat-l">You'd otherwise pay</span></div>
+    <div><span class="stat-n">${terminals}</span><span class="stat-l">Terminal${terminals === 1 ? '' : 's'}</span></div>
+    <div><span class="stat-n">${locked.length}</span><span class="stat-l">Out of reach</span></div>`;
+}
+
+function renderResults(unlocked, held) {
+  const el = document.getElementById('results');
+
+  if (!state.cards.length) {
+    el.innerHTML = `<p class="empty">Pick at least one card above and this fills in.</p>`;
+    return;
+  }
+  if (!unlocked.length) {
+    el.innerHTML = `<p class="empty">None of your cards unlock anything at ${leg().airport}. The section below shows what would.</p>`;
+    return;
+  }
+
+  const myGate = gateNum(leg().gate);
+  const order = AIRPORTS[leg().airport].terminals.slice();
+
+  // Your terminal floats to the top; the rest keep the airport's own order.
+  order.sort((a, b) => {
+    if (a === leg().terminal) return -1;
+    if (b === leg().terminal) return 1;
+    return 0;
+  });
+
+  el.innerHTML = order.map(term => {
+    const rows = unlocked.filter(p => p.t === term);
+    if (!rows.length) return '';
+
+    const isHere = term === leg().terminal;
+
+    // Shut venues drop to the bottom; otherwise nearest gate first.
+    rows.sort((x, y) => {
+      const sx = openStatus(x), sy = openStatus(y);
+      const cx = sx && sx.state === 'closed' ? 1 : 0;
+      const cy = sy && sy.state === 'closed' ? 1 : 0;
+      if (cx !== cy) return cx - cy;
+
+      const gx = gateNum(x.g), gy = gateNum(y.g);
+      if (isHere && myGate != null) {
+        const dx = gx == null ? 9e3 : Math.abs(gx - myGate);
+        const dy = gy == null ? 9e3 : Math.abs(gy - myGate);
+        if (dx !== dy) return dx - dy;
+      }
+      if (gx == null) return 1;
+      if (gy == null) return -1;
+      return gx - gy;
+    });
+
+    const reach = reachability(term);
+
+    return `
+      <section class="terminal">
+        <div class="terminal-head">
+          <h2 class="terminal-name"><span class="t-code">${esc(leg().airport)}</span>${esc(term)}</h2>
+          ${isHere ? '<span class="here-tag">You are here</span>' : ''}
+          <span class="terminal-count">${rows.length}</span>
+        </div>
+        ${reach ? `<div class="reach is-${reach.ok ? 'ok' : 'no'}">${esc(reach.label)}</div>` : ''}
+        ${rows.map(p => perkRow(p, isHere, myGate, held)).join('')}
+      </section>`;
+  }).join('');
+}
+
+function perkRow(p, isHere, myGate, held) {
+  const g = gateNum(p.g);
+
+  // Always lead with a gate reference — it is the one landmark everyone understands.
+  let where;
+  if (isHere && myGate != null && g != null) {
+    const d = Math.abs(g - myGate);
+    const phrase = d === 0 ? 'At your gate' : `About ${d} gate${d === 1 ? '' : 's'} away`;
+    where = `<span class="${d <= 6 ? 'near' : 'gate'}">${phrase}</span><span>nearest gate ${esc(p.g)}</span>`;
+  } else if (p.g) {
+    where = `<span class="gate">Nearest gate ${esc(p.g)}</span>`;
+  } else {
+    where = `<span class="gate">${esc(p.t)}</span>`;
+  }
+
+  // A floor change matters more than a few gates of walking, so it gets its own chip.
+  const level = p.lvl ? `<span class="level">${esc(p.lvl)}</span>` : '';
+
+  const via = p.req.filter(r => held.has(r));
+  const openers = via.flatMap(r => cardsGranting(r).map(c => ({ card: c, program: r })));
+  const first = openers[0];
+  const others = new Set(openers.map(o => `${o.card.issuer} ${o.card.name}`)).size - 1;
+
+  const viaLine = first
+    ? `<div class="via">Via <b>${esc(first.card.issuer)} ${esc(first.card.name)}</b>${others > 0 ? ` (+${others} more)` : ''} &middot; ${esc(PROGRAMS[first.program])}</div>`
+    : '';
+
+  const rule = first ? guestRule(first.card, first.program) : null;
+  const guestLine = rule ? `<div class="guests"><span>Guests</span> ${esc(rule)}</div>` : '';
+
+  const st = openStatus(p);
+  const badge = st ? `<span class="badge is-${st.state}">${esc(st.label)}</span>` : '';
+
+  return `
+    <article class="perk${st && st.state === 'closed' ? ' is-shut' : ''}">
+      <div class="perk-stripe"></div>
+      <div class="perk-main">
+        <h3 class="perk-name">${esc(p.n)}</h3>
+        <div class="perk-kind">${esc(p.k)}</div>
+        <p class="perk-get">${esc(p.get)}</p>
+        <div class="perk-meta">
+          ${badge}
+          ${where}
+          ${level}
+          <span>${esc(p.hrs)}</span>
+        </div>
+        ${viaLine}
+        ${guestLine}
+        ${p.flag ? `<div class="flag">${esc(p.flag)}</div>` : ''}
+      </div>
+      <div class="perk-value">
+        <span class="pv-amt">$${p.v}</span>
+        <span class="pv-lbl">you save</span>
+      </div>
+    </article>`;
+}
+
+/* Cards in the wallet that open nothing here — worth saying out loud so you
+   don't go hunting for a benefit that was never on the card. */
+function renderDeadCards() {
+  const el = document.getElementById('deadNote');
+  const dead = CARDS.filter(c => state.cards.includes(c.id) && !c.grants.length);
+  if (!dead.length) { el.innerHTML = ''; return; }
+  const names = dead.map(c => `${c.issuer} ${c.name}`).join(', ');
+  el.innerHTML = `<b>${esc(names)}</b> ${dead.length === 1 ? 'opens' : 'open'} nothing at any airport — no lounges, no gaming, no spa, no dining credits. Worth carrying for other reasons, just not this one.`;
+}
+
+function renderLocked(locked, held) {
+  const el = document.getElementById('locked');
+  if (!locked.length) {
+    el.innerHTML = '';
+    return;
+  }
+
+  // Group by the single card that would unlock the most here.
+  const byCard = new Map();
+  locked.forEach(p => {
+    const openers = CARDS.filter(c => !state.cards.includes(c.id) && c.grants.some(gr => p.req.includes(gr)));
+    if (!openers.length) return;
+    openers.forEach(c => {
+      if (!byCard.has(c.id)) byCard.set(c.id, { card: c, perks: [] });
+      byCard.get(c.id).perks.push(p);
+    });
+  });
+
+  const groups = [...byCard.values()]
+    .sort((a, b) => b.perks.length - a.perks.length || b.perks.reduce((s,p)=>s+p.v,0) - a.perks.reduce((s,p)=>s+p.v,0))
+    .slice(0, 4);
+
+  if (!groups.length) { el.innerHTML = ''; return; }
+
+  // The Priority Pass tier trap is worth calling out once, at the top.
+  const trapped = locked.map(p => lockReason(p, held)).find(Boolean);
+
+  el.innerHTML = `
+    <div class="section-head">
+      <h2 class="section-title">Not in your wallet</h2>
+      <p class="section-sub">What else is sitting at ${leg().airport} right now, and the single card that would open the most of it.</p>
+      ${trapped ? `<div class="flag" style="margin-bottom:18px">${esc(trapped)}</div>` : ''}
+    </div>
+    ${groups.map(({ card, perks }) => {
+      const worth = perks.reduce((s, p) => s + p.v, 0);
+      return `
+        <div class="unlock-group">
+          <div class="unlock-head">
+            <h3 class="unlock-card">${esc(card.issuer)} ${esc(card.name)}</h3>
+            <span class="unlock-worth">${perks.length} perk${perks.length === 1 ? '' : 's'} &middot; ~$${worth}</span>
+          </div>
+          ${perks.slice(0, 6).map(p => `
+            <div class="locked-item">
+              <span><b>${esc(p.n)}</b> &middot; ${esc(p.k)}</span>
+              <span class="locked-where">${esc(p.g ? 'Gate ' + p.g : p.t)}</span>
+            </div>`).join('')}
+          ${perks.length > 6 ? `<div class="locked-item"><span>and ${perks.length - 6} more</span><span class="locked-where"></span></div>` : ''}
+        </div>`;
+    }).join('')}`;
+}
+
+/* ============================ PLAN MODE ============================ */
+
+/* null = we have not mapped this pairing; [] = the airline genuinely does not serve it. */
+function terminalsFor(airline, code) {
+  const a = AIRLINES[airline];
+  if (!a) return null;
+  return Object.prototype.hasOwnProperty.call(a, code) ? a[code] : null;
+}
+
+function unlockedIn(code, terminals, held) {
+  return PERKS.filter(p => p.a === code && terminals.includes(p.t) && p.req.some(r => held.has(r)));
+}
+
+function sumValue(list) { return list.reduce((s, p) => s + p.v, 0); }
+
+function renderPlanControls() {
+  document.getElementById('homeRow').innerHTML = Object.keys(AIRPORTS).map(code =>
+    `<button class="home" data-home="${code}" aria-pressed="${state.home.includes(code)}">${code}</button>`
+  ).join('');
+
+  document.getElementById('airline').innerHTML = Object.keys(AIRLINES).map(name =>
+    `<option value="${esc(name)}"${name === state.airline ? ' selected' : ''}>${esc(name)}</option>`
+  ).join('');
+
+  document.getElementById('income').innerHTML = INCOME_BANDS.map(b =>
+    `<option value="${b.id}"${b.id === state.income ? ' selected' : ''}>${esc(b.label)}</option>`
+  ).join('');
+}
+
+function renderPlan() {
+  const held = heldPrograms();
+  const el = document.getElementById('planResults');
+
+  if (!state.home.length) {
+    el.innerHTML = `<p class="empty">Pick at least one airport you fly from.</p>`;
+    return;
+  }
+
+  el.innerHTML =
+    planReality(held) +
+    planAirlines(held) +
+    planCards(held);
+}
+
+/* ---- Block 1: what your wallet actually gets you in the terminal you use ---- */
+function planReality(held) {
+  const rows = state.home.map(code => {
+    const terminals = terminalsFor(state.airline, code);
+    const airlineNote = AIRLINES[state.airline].note && AIRLINES[state.airline].note[code];
+
+    if (terminals === null) {
+      return `
+        <div class="verdict">
+          <div class="verdict-stripe"></div>
+          <div class="verdict-body">
+            <div class="verdict-route">${code} &middot; ${esc(state.airline)}</div>
+            <p class="verdict-line">We haven't mapped ${esc(state.airline)} at ${code} yet</p>
+            <p class="verdict-detail">Terminal assignments move around, and a wrong guess here would send you to the wrong end of the airport. Rather than invent one, we've left it blank.</p>
+          </div>
+        </div>`;
+    }
+
+    if (!terminals.length) {
+      return `
+        <div class="verdict">
+          <div class="verdict-stripe"></div>
+          <div class="verdict-body">
+            <div class="verdict-route">${code} &middot; ${esc(state.airline)}</div>
+            <p class="verdict-line">${esc(state.airline)} doesn't fly from ${code}</p>
+            <p class="verdict-detail">${esc(airlineNote || 'Pick a different airline or drop this airport to get a useful read.')}</p>
+          </div>
+        </div>`;
+    }
+
+    const unlocked = unlockedIn(code, terminals, held);
+    const lounges = unlocked.filter(p => p.k === 'Lounge');
+    const others  = unlocked.filter(p => p.k !== 'Lounge');
+    const termLabel = terminals.length === 1 ? terminals[0] : terminals.join(' / ');
+
+    let cls, line, detail;
+
+    if (!unlocked.length) {
+      cls = 'is-bad';
+      line = `Your cards get you nothing in ${termLabel}`;
+      detail = `Flying ${state.airline} out of ${code} puts you in <b>${esc(termLabel)}</b>, where none of your cards open anything at all.`;
+    } else if (!lounges.length) {
+      cls = 'is-thin';
+      line = `No lounge for you in ${termLabel}`;
+      detail = `Flying ${state.airline} out of ${code} puts you in <b>${esc(termLabel)}</b>. Your cards open ${others.length} thing${others.length === 1 ? '' : 's'} here — ${others.map(p => esc(p.n)).join(', ')} — but not a single lounge.`;
+    } else {
+      cls = 'is-good';
+      line = `${lounges.length} lounge${lounges.length === 1 ? '' : 's'} within reach in ${termLabel}`;
+      detail = `Flying ${state.airline} out of ${code} puts you in <b>${esc(termLabel)}</b>. Your cards open ${unlocked.length} perk${unlocked.length === 1 ? '' : 's'} here, worth about <b>$${sumValue(unlocked)}</b> at walk-up prices.`;
+    }
+
+    return `
+      <div class="verdict ${cls}">
+        <div class="verdict-stripe"></div>
+        <div class="verdict-body">
+          <div class="verdict-route">${code} &middot; ${esc(state.airline)} &middot; ${esc(termLabel)}</div>
+          <p class="verdict-line">${esc(line)}</p>
+          <p class="verdict-detail">${detail}</p>
+        </div>
+      </div>`;
+  }).join('');
+
+  return `
+    <section class="terminal">
+      <div class="section-head">
+        <h2 class="section-title">Your terminal reality</h2>
+        <p class="section-sub">A card is only as good as the terminal it works in. This is what your wallet opens where you actually depart from.</p>
+      </div>
+      ${rows}
+    </section>`;
+}
+
+/* ---- Block 2: which airline would serve your existing wallet better ---- */
+function planAirlines(held) {
+  const blocks = state.home.map(code => {
+    const ranked = Object.keys(AIRLINES)
+      .map(name => {
+        const terms = terminalsFor(name, code);
+        if (!terms || !terms.length) return null;
+        const unlocked = unlockedIn(code, terms, held);
+        return { name, terms, unlocked, value: sumValue(unlocked) };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.value - a.value || b.unlocked.length - a.unlocked.length);
+
+    if (!ranked.length) return '';
+
+    const mine = ranked.find(r => r.name === state.airline);
+    const best = ranked[0];
+
+    // Nothing to say if they are already flying the best option for their wallet.
+    if (mine && best.name === mine.name) {
+      return `
+        <div class="verdict is-good">
+          <div class="verdict-stripe"></div>
+          <div class="verdict-body">
+            <div class="verdict-route">${code}</div>
+            <p class="verdict-line">${esc(state.airline)} is already your best option here</p>
+            <p class="verdict-detail">No other airline at ${code} puts you in a terminal where your cards do more.</p>
+          </div>
+        </div>`;
+    }
+
+    const gain = best.value - (mine ? mine.value : 0);
+    return `
+      <div class="verdict is-thin">
+        <div class="verdict-stripe"></div>
+        <div class="verdict-body">
+          <div class="verdict-route">${code}</div>
+          <p class="verdict-line">Fly ${esc(best.name)} instead and your wallet does more</p>
+          <p class="verdict-detail">${esc(best.name)} departs from <b>${esc(best.terms.join(' / '))}</b>, where your cards open ${best.unlocked.length} perk${best.unlocked.length === 1 ? '' : 's'} worth about <b>$${best.value}</b>${gain > 0 ? ` — roughly <b>$${gain} more</b> per trip than ${esc(state.airline)}` : ''}.</p>
+        </div>
+      </div>`;
+  }).join('');
+
+  if (!blocks.trim()) return '';
+
+  return `
+    <section class="terminal" style="margin-top:38px">
+      <div class="section-head">
+        <h2 class="section-title">Better airlines for the cards you already have</h2>
+        <p class="section-sub">Same wallet, different terminal. Worth knowing when a fare is close either way.</p>
+      </div>
+      ${blocks}
+    </section>`;
+}
+
+/* ---- Block 3: which card to add, filtered by what you can realistically carry ---- */
+function planCards(held) {
+  const band = INCOME_BANDS.find(b => b.id === state.income) || INCOME_BANDS[INCOME_BANDS.length - 1];
+
+  // Only count perks in terminals this person will actually stand in.
+  const reachable = [];
+  state.home.forEach(code => {
+    const terms = terminalsFor(state.airline, code) || [];
+    terms.forEach(t => PERKS.filter(p => p.a === code && p.t === t).forEach(p => reachable.push(p)));
+  });
+
+  const candidates = CARDS
+    .filter(c => !state.cards.includes(c.id))
+    .filter(c => c.fee <= band.maxFee)
+    .map(c => {
+      const merged = new Set([...held, ...c.grants]);
+      const gained = reachable.filter(p => !p.req.some(r => held.has(r)) && p.req.some(r => merged.has(r)));
+      // Card-level benefits count too, but only the ones that apply to the airline they fly.
+      const extras = (c.extras || []).filter(x => !x.airline || x.airline === state.airline);
+      return { card: c, gained, extras, value: sumValue(gained) + sumValue(extras) };
+    })
+    .filter(x => x.gained.length + x.extras.length > 0)
+    .sort((a, b) => b.value - a.value || a.card.fee - b.card.fee)
+    .slice(0, 4);
+
+  const overBudget = CARDS.filter(c => !state.cards.includes(c.id) && c.fee > band.maxFee).length;
+
+  let body;
+  if (!candidates.length) {
+    body = `<p class="empty">No card under $${band.maxFee === 9999 ? '∞' : band.maxFee} adds anything in the terminals you fly from.${overBudget ? ` ${overBudget} card${overBudget === 1 ? ' was' : 's were'} filtered out as too expensive for this income band.` : ''}</p>`;
+  } else {
+    body = candidates.map(x => {
+      const where = [...new Set(x.gained.map(p => `${p.a} ${p.t}`))];
+      const venueLine = x.gained.length
+        ? `<p class="rec-why">Opens <b>${x.gained.length} venue${x.gained.length === 1 ? '' : 's'}</b> in the terminals you actually use: ${esc(x.gained.slice(0, 4).map(p => p.n).join(', '))}${x.gained.length > 4 ? `, and ${x.gained.length - 4} more` : ''}.</p>`
+        : '';
+      const extraLine = x.extras.length
+        ? `<p class="rec-why">Also brings ${esc(x.extras.map(e => e.n.toLowerCase()).join(', '))}.</p>`
+        : '';
+      return `
+        <div class="rec">
+          <h3 class="rec-name">${esc(x.card.issuer)} ${esc(x.card.name)}</h3>
+          <span class="rec-fee">$${x.card.fee}/yr</span>
+          ${venueLine}
+          ${extraLine}
+          <div class="rec-gain">~$${x.value} of value${where.length ? ` &middot; ${esc(where.join(' · '))}` : ''}</div>
+          ${x.card.closed ? `<div class="rec-closed">${esc(x.card.closed)}</div>` : ''}
+        </div>`;
+    }).join('');
+  }
+
+  return `
+    <section class="terminal" style="margin-top:38px">
+      <div class="section-head">
+        <h2 class="section-title">Cards worth adding</h2>
+        <p class="section-sub">Ranked by what they open in the terminals you fly from — not by headline perks you'd never reach.</p>
+        <div class="flag" style="margin-bottom:18px">${esc(band.note)} Annual fees are approximate and issuers weigh far more than income when approving — treat this as a shortlist, not an approval odds calculator.</div>
+      </div>
+      ${body}
+    </section>`;
+}
+
+/* ============================ EVENTS ============================ */
+document.getElementById('trip').addEventListener('change', e => {
+  const sel = e.target.closest('[data-sel]');
+  if (!sel) return;
+  const slot = sel.dataset.sel;
+  const l = state.legs[slot];
+  l.airport = sel.value;
+  l.terminal = '';
+  l.gate = '';
+  l.flight = '';
+  state.slot = slot;   // changing a stop's airport means you want to look at it
+  render();
+});
+
+document.getElementById('terminal').addEventListener('change', e => {
+  leg().terminal = e.target.value;
+  render();
+});
+
+document.getElementById('flight').addEventListener('input', e => {
+  leg().flight = e.target.value;
+  applyFlight(true);
+  render();
+});
+
+document.getElementById('gate').addEventListener('input', e => {
+  leg().gate = e.target.value.trim();
+  const held = heldPrograms();
+  const all = PERKS.filter(p => p.a === leg().airport);
+  renderResults(all.filter(p => p.req.some(r => held.has(r))), held);
+  save();
+});
+
+document.getElementById('walletBody').addEventListener('change', e => {
+  const box = e.target.closest('[data-card]');
+  if (!box) return;
+  const id = box.dataset.card;
+  state.cards = box.checked
+    ? [...new Set([...state.cards, id])]
+    : state.cards.filter(c => c !== id);
+
+  const open = document.getElementById('wallet').open;
+  render();
+  document.getElementById('wallet').open = open;
+});
+
+document.getElementById('trip').addEventListener('click', e => {
+  if (e.target.closest('select')) return;   // let the picker open without switching view
+  if (e.target.closest('[data-drop]')) {
+    state.legs.via = null;
+    state.slot = 'from';
+    render();
+    return;
+  }
+  if (e.target.closest('[data-add]')) {
+    const taken = state.legs.from.airport;
+    state.legs.via = { airport: Object.keys(AIRPORTS).find(c => c !== taken), terminal:'', gate:'', flight:'' };
+    state.slot = 'via';
+    render();
+    return;
+  }
+  const slot = e.target.closest('[data-slot]');
+  if (slot) { state.slot = slot.dataset.slot; render(); }
+});
+
+document.getElementById('dod').addEventListener('change', e => {
+  state.dod = e.target.checked;
+  render();
+});
+
+document.querySelector('.tabs').addEventListener('click', e => {
+  const tab = e.target.closest('.tab');
+  if (!tab) return;
+  state.tab = tab.id.replace('tab-', '');
+  render();
+});
+
+document.getElementById('homeRow').addEventListener('click', e => {
+  const btn = e.target.closest('[data-home]');
+  if (!btn) return;
+  const code = btn.dataset.home;
+  state.home = state.home.includes(code)
+    ? state.home.filter(h => h !== code)
+    : [...state.home, code];
+  render();
+});
+
+document.getElementById('airline').addEventListener('change', e => {
+  state.airline = e.target.value;
+  render();
+});
+
+document.getElementById('income').addEventListener('change', e => {
+  state.income = e.target.value;
+  render();
+});
+
+render();
+</script>
+
+</body>
+</html>
