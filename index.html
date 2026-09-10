@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Every perk your credit cards actually unlock at 22 US airports — lounges, gaming, spas, dining credits — sorted by how far it is from your gate.">
+<meta name="description" content="Every perk your credit cards actually unlock at 31 airports across the US, Europe and Canada — sorted by how far it is from your gate.">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#16202B">
 <meta property="og:title" content="Layover">
@@ -937,7 +937,7 @@
         </svg>
         <h1 class="wordmark">Lay<em>over</em></h1>
       </div>
-      <span class="stamp">22 airports &middot; Verified Sep 2026</span>
+      <span class="stamp">31 airports &middot; Verified Sep 2026</span>
     </div>
     <p>Every perk your cards actually unlock at this airport &mdash; lounges, gaming, spa treatments, dining credits &mdash; sorted by how far it is from your gate.</p>
   </header>
@@ -1026,8 +1026,10 @@
   </div><!-- /panel-plan -->
 
   <footer>
-    <p><b>Prototype.</b> Perk data is hand-curated across 22 airports and 32 cards, and reflects public sources as of September 2026. Airport benefits change constantly &mdash; lounges leave networks, restaurants drop out, terminals get reassigned. Confirm in your issuer's app before you count on anything here.</p>
+    <p><b>Prototype.</b> Perk data is hand-curated across 31 airports and 32 cards, and reflects public sources as of September 2026. Airport benefits change constantly &mdash; lounges leave networks, restaurants drop out, terminals get reassigned. Confirm in your issuer's app before you count on anything here.</p>
     <p><b>Open now</b> is calculated in the airport's own timezone, not your phone's. Venues with irregular hours show their schedule without a badge rather than risk a wrong one, and anything shut drops to the bottom of its terminal.</p>
+    <p><b>Abroad, the card mix changes.</b> Chase Sapphire Lounges, Capital One Lounges, Delta Sky Clubs and Admirals Clubs are almost entirely US-only. Outside the US it is Priority Pass, Plaza Premium and airline lounges doing the work, with exactly one Centurion Lounge in Europe &mdash; Heathrow Terminal 3. Priority Pass is also markedly stronger abroad than it is at home.</p>
+    <p><b>Preclearance and Schengen.</b> Dublin, Toronto and Vancouver clear US immigration before you fly, and once through you cannot go back &mdash; so a lounge on the wrong side is no lounge at all. European airports split Schengen from non-Schengen behind passport control. Both are flagged on the airports affected.</p>
     <p><b>Getting there.</b> When you set a terminal, every other terminal is marked with whether you can walk to it without clearing security again. Where a connection is uncertain we err toward telling you to re-screen &mdash; a wasted walk costs you minutes, a missed connection costs you the flight.</p>
     <p><b>Military access</b> is compiled from USO's published admissions policy and airline baggage pages, not from lived experience &mdash; verify with the USO app before relying on it. The eligibility line that catches people out: active duty, Reserve, Guard, retirees and dependents with a DoD ID all qualify, but veterans without one do not. Baggage rules also differ sharply between travelling on orders and travelling personally.</p>
     <p><b>Guest rules changed a lot in 2026.</b> Capital One ended free Priority Pass guests, Amex cut Centurion to one guest with a $50 fee beyond that, and Sapphire Reserve quietly became the most generous of the three at two guests free.</p>
@@ -1202,17 +1204,17 @@ const CARDS = [
    have not mapped it yet, which the app says out loud rather than guessing.
 ============================================================================= */
 const AIRLINES = {
-  'American':        { JFK:['Terminal 8'], LGA:['Terminal B'], EWR:['Terminal A'], SFO:['Terminal 1'], LAX:['Terminal 4'], DFW:['Terminal A','Terminal B','Terminal C','Terminal D'], DEN:['Concourse C'], PHX:['Terminal 4'], MIA:['Concourse D'], PHL:['Terminal A','Terminal B','Terminal C','Terminal F'], DCA:['Concourse C','Concourse D','Concourse E'], IAD:['Concourse B'], ATL:['Concourse T'], ORD:['Terminal 3'], CLT:['Concourse A','Concourse B','Concourse C','Concourse D','Concourse E'], SEA:['Concourse A'], BOS:['Terminal B'], IAH:['Terminal A'], MSP:['Concourse C'], DTW:['Evans Terminal'], LAS:['Concourse D'], MCO:['Terminal B'] },
-  'Delta':           { JFK:['Terminal 4'], LGA:['Terminal C'], EWR:['Terminal A'], SFO:['Terminal 1'], LAX:['Terminal 3'], DFW:['Terminal E'], DEN:['Concourse A'], PHX:['Terminal 3'], MIA:['Concourse H'], PHL:['Terminal D/E'], DCA:['Concourse B'], IAD:['Concourse B'], ATL:['Concourse A','Concourse B','Concourse C','Concourse D','Concourse E','Concourse F'], ORD:['Terminal 5'], CLT:['Concourse A'], SEA:['Concourse A'], BOS:['Terminal A'], IAH:['Terminal A'], MSP:['Concourse C','Concourse E','Concourse F','Concourse G'], DTW:['McNamara Terminal'], LAS:['Concourse E'], MCO:['Terminal B'] },
-  'United':          { JFK:[], LGA:['Terminal B'], EWR:['Terminal C'], SFO:['Terminal 3','International Terminal G'], LAX:['Terminal 7'], DFW:['Terminal E'], DEN:['Concourse B'], PHX:['Terminal 3'], PHL:['Terminal C'], DCA:['Concourse B'], IAD:['Concourse C','Concourse D'], ATL:['Concourse T'], ORD:['Terminal 1','Terminal 2'], CLT:['Concourse D'], SEA:['Concourse B'], BOS:['Terminal B'], IAH:['Terminal A','Terminal C','Terminal E'], MSP:['Concourse E'], DTW:['Evans Terminal'], LAS:['Concourse D'], MCO:['Terminal B'] },
+  'American':        { JFK:['Terminal 8'], LGA:['Terminal B'], EWR:['Terminal A'], SFO:['Terminal 1'], LAX:['Terminal 4'], DFW:['Terminal A','Terminal B','Terminal C','Terminal D'], DEN:['Concourse C'], PHX:['Terminal 4'], MIA:['Concourse D'], PHL:['Terminal A','Terminal B','Terminal C','Terminal F'], DCA:['Concourse C','Concourse D','Concourse E'], IAD:['Concourse B'], ATL:['Concourse T'], ORD:['Terminal 3'], CLT:['Concourse A','Concourse B','Concourse C','Concourse D','Concourse E'], SEA:['Concourse A'], BOS:['Terminal B'], IAH:['Terminal A'], MSP:['Concourse C'], DTW:['Evans Terminal'], LAS:['Concourse D'], MCO:['Terminal B'], LHR:['Terminal 3'], DUB:['Terminal 2'], MAD:['Terminal 4 Satellite'], FCO:['Terminal 3'], YYZ:['T3 US Departures'] },
+  'Delta':           { JFK:['Terminal 4'], LGA:['Terminal C'], EWR:['Terminal A'], SFO:['Terminal 1'], LAX:['Terminal 3'], DFW:['Terminal E'], DEN:['Concourse A'], PHX:['Terminal 3'], MIA:['Concourse H'], PHL:['Terminal D/E'], DCA:['Concourse B'], IAD:['Concourse B'], ATL:['Concourse A','Concourse B','Concourse C','Concourse D','Concourse E','Concourse F'], ORD:['Terminal 5'], CLT:['Concourse A'], SEA:['Concourse A'], BOS:['Terminal A'], IAH:['Terminal A'], MSP:['Concourse C','Concourse E','Concourse F','Concourse G'], DTW:['McNamara Terminal'], LAS:['Concourse E'], MCO:['Terminal B'], LHR:['Terminal 3'], CDG:['Terminal 2E'], AMS:['Departures Hall 2'], FCO:['Terminal 1'], DUB:['Terminal 2'], YYZ:['T3 US Departures'] },
+  'United':          { JFK:[], LGA:['Terminal B'], EWR:['Terminal C'], SFO:['Terminal 3','International Terminal G'], LAX:['Terminal 7'], DFW:['Terminal E'], DEN:['Concourse B'], PHX:['Terminal 3'], PHL:['Terminal C'], DCA:['Concourse B'], IAD:['Concourse C','Concourse D'], ATL:['Concourse T'], ORD:['Terminal 1','Terminal 2'], CLT:['Concourse D'], SEA:['Concourse B'], BOS:['Terminal B'], IAH:['Terminal A','Terminal C','Terminal E'], MSP:['Concourse E'], DTW:['Evans Terminal'], LAS:['Concourse D'], MCO:['Terminal B'], LHR:['Terminal 2'], FRA:['Terminal 1'], AMS:['Departures Hall 2'], CDG:['Terminal 1'], DUB:['Terminal 2'], YYZ:['T1 US Transborder'], YVR:['US Transborder'] },
   'JetBlue':         { JFK:['Terminal 5'], LGA:['Terminal B'], EWR:['Terminal A'], SFO:['Terminal 1'], LAX:['Terminal 6'], DFW:[], MIA:['Concourse E'], PHL:['Terminal D/E'], DCA:['Concourse B'], BOS:['Terminal C'], MCO:['Terminal A'], LAS:['Concourse C'], ORD:['Terminal 3'] },
   'Alaska':          { JFK:[], EWR:['Terminal A'], SFO:['Terminal 1'], LAX:['Terminal 6'], DFW:['Terminal E'], DEN:['Concourse A'], PHX:['Terminal 3'], DCA:['Concourse B'], SEA:['Concourse C','Concourse D','North Satellite'], BOS:['Terminal B'], ORD:['Terminal 3'], LAS:['Concourse C'], MCO:['Terminal B'] },
   'Southwest':       { JFK:[], LGA:['Terminal B'], SFO:['Terminal 1'], LAX:['Terminal 1'], DFW:[], DEN:['Concourse C'], PHX:['Terminal 4'], MIA:['Concourse H'], PHL:['Terminal D/E'], DCA:['Concourse B'], ATL:['Concourse C'], ORD:['Terminal 5'], BOS:['Terminal A'], MSP:['Concourse C'], DTW:['Evans Terminal'], LAS:['Concourse B','Concourse C'], MCO:['Terminal A'],
                        note:{ DFW:'Southwest does not fly from DFW — they use Dallas Love Field (DAL).' } },
-  'British Airways': { JFK:['Terminal 8'], EWR:['Terminal B'], SFO:['International Terminal A'], LAX:['Tom Bradley International'], DFW:['Terminal D'], DEN:['Concourse C'], PHX:['Terminal 4'], MIA:['Concourse E'], PHL:['Terminal A'], IAD:['Concourse B'], ORD:['Terminal 5'], BOS:['Terminal E'], SEA:['South Satellite'], IAH:['Terminal D'], ATL:['Concourse F'], LAS:['Concourse E'], MCO:['Terminal C'] },
-  'Air France / KLM':{ JFK:['Terminal 1'], SFO:['International Terminal A'], LAX:['Tom Bradley International'], DFW:['Terminal D'], IAD:['Terminal A'], MIA:['Concourse E'], ORD:['Terminal 5'], BOS:['Terminal E'], IAH:['Terminal D'], ATL:['Concourse F'], SEA:['South Satellite'], MSP:['Concourse G'], DTW:['McNamara Terminal'] },
-  'Emirates':        { JFK:['Terminal 4'], EWR:['Terminal B'], SFO:['International Terminal A'], LAX:['Tom Bradley International'], DFW:['Terminal D'], MIA:['Concourse E'], IAD:['Terminal A'], ORD:['Terminal 5'], BOS:['Terminal E'], SEA:['South Satellite'], IAH:['Terminal D'], ATL:['Concourse F'] },
-  'Turkish Airlines':{ JFK:['Terminal 1'], EWR:['Terminal B'], SFO:['International Terminal A'], LAX:['Tom Bradley International'], DFW:['Terminal D'], MIA:['Concourse E'], IAD:['Concourse B'], ORD:['Terminal 5'], BOS:['Terminal E'], SEA:['South Satellite'], IAH:['Terminal D'], ATL:['Concourse F'] }
+  'British Airways': { JFK:['Terminal 8'], EWR:['Terminal B'], SFO:['International Terminal A'], LAX:['Tom Bradley International'], DFW:['Terminal D'], DEN:['Concourse C'], PHX:['Terminal 4'], MIA:['Concourse E'], PHL:['Terminal A'], IAD:['Concourse B'], ORD:['Terminal 5'], BOS:['Terminal E'], SEA:['South Satellite'], IAH:['Terminal D'], ATL:['Concourse F'], LAS:['Concourse E'], MCO:['Terminal C'], LHR:['Terminal 5'], DUB:['Terminal 1'], MAD:['Terminal 4'], FCO:['Terminal 3'], AMS:['Departures Hall 1'], YYZ:['T3 International'], YVR:['International'], FRA:['Terminal 2'], CDG:['Terminal 2A'] },
+  'Air France / KLM':{ JFK:['Terminal 1'], SFO:['International Terminal A'], LAX:['Tom Bradley International'], DFW:['Terminal D'], IAD:['Terminal A'], MIA:['Concourse E'], ORD:['Terminal 5'], BOS:['Terminal E'], IAH:['Terminal D'], ATL:['Concourse F'], SEA:['South Satellite'], MSP:['Concourse G'], DTW:['McNamara Terminal'], CDG:['Terminal 2E','Terminal 2F'], AMS:['Departures Hall 2'], LHR:['Terminal 4'], FCO:['Terminal 1'], MAD:['Terminal 2'], YYZ:['T3 International'], YVR:['International'], FRA:['Terminal 3'], DUB:['Terminal 2'] },
+  'Emirates':        { JFK:['Terminal 4'], EWR:['Terminal B'], SFO:['International Terminal A'], LAX:['Tom Bradley International'], DFW:['Terminal D'], MIA:['Concourse E'], IAD:['Terminal A'], ORD:['Terminal 5'], BOS:['Terminal E'], SEA:['South Satellite'], IAH:['Terminal D'], ATL:['Concourse F'], LHR:['Terminal 3'], FRA:['Terminal 2'], MAD:['Terminal 4 Satellite'], FCO:['Terminal 3'], AMS:['Departures Hall 3'], YYZ:['T3 International'], DUB:['Terminal 2'] },
+  'Turkish Airlines':{ JFK:['Terminal 1'], EWR:['Terminal B'], SFO:['International Terminal A'], LAX:['Tom Bradley International'], DFW:['Terminal D'], MIA:['Concourse E'], IAD:['Concourse B'], ORD:['Terminal 5'], BOS:['Terminal E'], SEA:['South Satellite'], IAH:['Terminal D'], ATL:['Concourse F'], LHR:['Terminal 2'], CDG:['Terminal 1'], FRA:['Terminal 1'], AMS:['Departures Hall 1'], FCO:['Terminal 1'], MAD:['Terminal 1'], DUB:['Terminal 1'], YYZ:['T1 International'] }
 };
 
 /* ============================ INCOME BANDS ============================
@@ -1282,6 +1284,32 @@ const AIRPORTS = {
          airside:[['Concourse B','Concourse C','Concourse D','Concourse E']] },
   MCO: { city:'Orlando',             tz:'America/New_York', terminals:['Terminal A','Terminal B','Terminal C'],
          airside:[['Terminal A','Terminal B'],['Terminal C']] },
+  LHR: { city:'London — Heathrow',   tz:'Europe/London', terminals:['Terminal 2','Terminal 3','Terminal 4','Terminal 5'],
+         airside:[['Terminal 2'],['Terminal 3'],['Terminal 4'],['Terminal 5']],
+         note:'Heathrow terminals are not connected after security. A lounge in another terminal means leaving, transferring and screening again — rarely worth it on a short connection.' },
+  CDG: { city:'Paris — Charles de Gaulle', tz:'Europe/Paris', terminals:['Terminal 1','Terminal 2E','Terminal 2F','Terminal 3'],
+         airside:[['Terminal 1'],['Terminal 2E','Terminal 2F'],['Terminal 3']],
+         note:'Charles de Gaulle is unusually thin for card lounges — one Priority Pass venue across the whole airport, and no Centurion Lounge. Plan on an airline lounge or nothing.' },
+  AMS: { city:'Amsterdam',           tz:'Europe/Amsterdam', terminals:['Departures Hall 1','Departures Hall 2','Departures Hall 3'],
+         airside:[['Departures Hall 1','Departures Hall 2','Departures Hall 3']],
+         note:'Schiphol is one connected airside area, but Schengen and non-Schengen zones are separated by passport control — check which side your gate is on before walking to a lounge.' },
+  FRA: { city:'Frankfurt',           tz:'Europe/Berlin', terminals:['Terminal 1','Terminal 2','Terminal 3'],
+         airside:[['Terminal 1'],['Terminal 2'],['Terminal 3']],
+         note:'Frankfurt splits Schengen and non-Schengen departures within each terminal, and Terminal 3 is a separate building. Confirm your gate zone before committing to a lounge.' },
+  DUB: { city:'Dublin',              tz:'Europe/Dublin', terminals:['Terminal 1','Terminal 2','US Preclearance'],
+         airside:[['Terminal 1','Terminal 2'],['US Preclearance']],
+         note:'Dublin clears US immigration before you fly. Once you enter preclearance you cannot go back to the main terminal — so use any lounge before you clear, not after.' },
+  FCO: { city:'Rome',                tz:'Europe/Rome', terminals:['Terminal 1','Terminal 3'],
+         airside:[['Terminal 1'],['Terminal 3']] },
+  MAD: { city:'Madrid',              tz:'Europe/Madrid', terminals:['Terminal 1','Terminal 2','Terminal 3','Terminal 4','Terminal 4 Satellite'],
+         airside:[['Terminal 1','Terminal 2','Terminal 3'],['Terminal 4','Terminal 4 Satellite']],
+         note:'Terminals 1 to 3 connect on foot; Terminal 4 and its satellite are a train ride away and cannot be reached from T1–T3 after security.' },
+  YYZ: { city:'Toronto',             tz:'America/Toronto', terminals:['T1 Domestic','T1 US Transborder','T1 International','T3 Domestic','T3 US Departures','T3 International'],
+         airside:[['T1 Domestic'],['T1 US Transborder'],['T1 International'],['T3 Domestic'],['T3 US Departures'],['T3 International']],
+         note:'Toronto separates domestic, US transborder and international behind different checkpoints. US flights clear American immigration here, and you cannot return to the rest of the airport afterwards.' },
+  YVR: { city:'Vancouver',           tz:'America/Vancouver', terminals:['Domestic','International','US Transborder'],
+         airside:[['Domestic'],['International'],['US Transborder']],
+         note:'US flights from Vancouver clear American immigration before departure. Once through, only the transborder lounges are reachable.' },
 };
 
 /* Guest rules keyed by issuer + program. 2026 saw big changes here — Capital One
@@ -1622,7 +1650,81 @@ const PERKS = [
   { a:'IAH', t:'Terminal C', g:null, lvl:null, n:"Landry's Seafood", k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Sit-down seafood.', hrs:'Daily from 6am' },
   { a:'SEA', t:'North Satellite', g:null, lvl:null, n:'Bambuza Vietnam Kitchen', k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Vietnamese noodles and banh mi.', hrs:'Daily from 6am' },
   { a:'SEA', t:'Central Terminal', g:null, lvl:null, n:'Ninth & Pike Artisan Kitchen', k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Pike Place-inspired market kitchen.', hrs:'Daily from 6am' },
-  { a:'MIA', t:'Concourse D', g:null, lvl:null, n:'Corona Beach House', k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Open-air bar and grill.', hrs:'Daily from 7am' }
+  { a:'MIA', t:'Concourse D', g:null, lvl:null, n:'Corona Beach House', k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Open-air bar and grill.', hrs:'Daily from 7am' },
+
+  /* ---------------- LHR ---------------- */
+  { a:'LHR', t:'Terminal 2', g:null, lvl:'Level 4, one level up', n:'Plaza Premium Lounge', k:'Lounge', req:['pp-lounge','centurion'], v:62, get:'Hot buffet, full bar and shower suites.', hrs:'5am–9:30pm' },
+  { a:'LHR', t:'Terminal 2', g:null, lvl:'Level 5, two levels up', n:'Lufthansa Business Lounge', k:'Lounge', req:['pp-lounge'], v:55, get:'Buffet, bar and quiet seating in Terminal 2 South.', hrs:'5am–10pm' },
+  { a:'LHR', t:'Terminal 2', g:'B44', lvl:null, n:'Air Canada Maple Leaf Lounge', k:'Lounge', req:['pp-lounge'], v:55, get:'Hot food and a full bar.', hrs:'6am–10pm' },
+  { a:'LHR', t:'Terminal 2', g:'B46', lvl:null, n:'United Club', k:'Lounge', req:['united-club','military-uniform'], v:59, get:'Snacks, bar and workspace.', hrs:'5am–10pm', flag:'Requires a same-day United or Star Alliance flight.' },
+  { a:'LHR', t:'Terminal 3', g:null, lvl:'Level 2, in Lounge A', n:'Centurion Lounge', k:'Lounge', req:['centurion'], v:60, get:'Chef-designed menu, full bar and shower suites. The only Centurion Lounge in Europe.', hrs:'5:30am–9pm' },
+  { a:'LHR', t:'Terminal 3', g:'9', lvl:'In Lounge D', n:'My Lounge', k:'Lounge', req:['pp-lounge'], v:50, get:'Buffet, bar and quiet seating.', hrs:'5am–10pm' },
+  { a:'LHR', t:'Terminal 3', g:'13', lvl:'In the Lounge H connector', n:'No1 Lounge', k:'Lounge', req:['pp-lounge'], v:50, get:'À la carte dining, bar and shower suites.', hrs:'5am–10pm' },
+  { a:'LHR', t:'Terminal 3', g:null, lvl:null, n:'Clubrooms', k:'Lounge', req:['pp-lounge'], v:60, get:'Table-service dining and a quieter room than the main lounges.', hrs:'5am–9pm' },
+  { a:'LHR', t:'Terminal 3', g:'13', lvl:'In the Lounge H connector', n:'Virgin Atlantic Clubhouse', k:'Lounge', req:['pp-lounge','centurion'], v:75, get:'Cocktail bar, à la carte dining, spa treatments and showers.', hrs:'6am–10:30pm' },
+  { a:'LHR', t:'Terminal 3', g:'13', lvl:'In the Lounge H connector', n:'Admirals Club', k:'Lounge', req:['admirals','military-uniform'], v:79, get:'Buffet, bar and showers.', hrs:'5am–7:30pm', flag:'Requires a same-day American or Oneworld flight.' },
+  { a:'LHR', t:'Terminal 3', g:null, lvl:'Arrivals, ground floor', n:'Plaza Premium Arrivals', k:'Lounge', req:['pp-lounge','centurion'], v:55, get:'Showers, breakfast and a bar — for when you land, not before you fly.', hrs:'6am–2pm', flag:'Arrivals lounge. Useful after a redeye, useless before a departure.' },
+  { a:'LHR', t:'Terminal 4', g:'1A', lvl:null, n:'Plaza Premium Lounge', k:'Lounge', req:['pp-lounge','centurion'], v:62, get:'Hot buffet, full bar and shower suites.', hrs:'5am–10pm' },
+  { a:'LHR', t:'Terminal 4', g:'2', lvl:null, n:'Blush Lounge by Plaza Premium', k:'Lounge', req:['pp-lounge'], v:55, get:'Buffet, bar and quiet seating.', hrs:'7am–10:30pm' },
+  { a:'LHR', t:'Terminal 5', g:'18', lvl:null, n:'Club Aspire Lounge', k:'Lounge', req:['pp-lounge'], v:48, get:'Buffet, bar and workspace.', hrs:'5am–9pm' },
+  { a:'LHR', t:'Terminal 5', g:'A7', lvl:'Level 2, one level up', n:'Plaza Premium Lounge', k:'Lounge', req:['pp-lounge','centurion'], v:62, get:'Hot buffet, full bar and shower suites.', hrs:'5am–9:30pm' },
+
+  /* ---------------- CDG ---------------- */
+  { a:'CDG', t:'Terminal 2E', g:null, lvl:null, n:'YotelAir', k:'Nap suite', req:['pp-lounge'], v:55, get:'A private cabin with a bed and shower, bookable by the hour.', hrs:'Open 24 hours', flag:'The only Priority Pass venue at CDG. Book ahead — cabins sell out.' },
+
+  /* ---------------- AMS ---------------- */
+  { a:'AMS', t:'Departures Hall 2', g:null, lvl:null, n:'Aspire Lounge 41', k:'Lounge', req:['pp-lounge'], v:48, get:'Buffet, bar and quiet seating.', hrs:'6am–9pm' },
+  { a:'AMS', t:'Departures Hall 1', g:null, lvl:null, n:'Aspire Lounge 26', k:'Lounge', req:['pp-lounge'], v:48, get:'Buffet, bar and quiet seating.', hrs:'6am–9pm' },
+  { a:'AMS', t:'Departures Hall 2', g:null, lvl:null, n:'XpresSpa', k:'Spa', req:['pp-experience'], v:30, get:'Free massage-chair or wellness time.', hrs:'7am–9pm' },
+
+  /* ---------------- FRA ---------------- */
+  { a:'FRA', t:'Terminal 1', g:null, lvl:null, n:'LuxxLounge', k:'Lounge', req:['pp-lounge'], v:50, get:'Hot food, full bar and showers.', hrs:'6:30am–9:30pm' },
+  { a:'FRA', t:'Terminal 3', g:null, lvl:'Concourse J, Level 5', n:'Priority Lounge', k:'Lounge', req:['pp-lounge'], v:50, get:'Refreshments, showers, business facilities and sleeping pods.', hrs:'6:15am–9:15pm', flag:'In the non-Schengen departures area. Pre-booking available.' },
+  { a:'FRA', t:'Terminal 3', g:null, lvl:null, n:'Air France Lounge', k:'Lounge', req:['pp-lounge'], v:50, get:'Buffet, bar and quiet seating.', hrs:'5am–8pm' },
+  { a:'FRA', t:'Terminal 3', g:null, lvl:null, n:'SkyTeam Lounge', k:'Lounge', req:['pp-lounge'], v:55, get:'Hot buffet, full bar and showers.', hrs:'6:30am–10pm' },
+
+  /* ---------------- DUB ---------------- */
+  { a:'DUB', t:'Terminal 1', g:null, lvl:'Between Terminals 1 and 2', n:'Liffey Lounge', k:'Lounge', req:['pp-lounge'], v:45, get:'Buffet, bar and quiet seating.', hrs:'4am–9pm', flag:'Before US preclearance — use it on the way through, not after you clear.' },
+  { a:'DUB', t:'Terminal 1', g:null, lvl:null, n:'Garden Terrace', k:'Dining', req:['pp-restaurant'], v:28, get:'A meal credit per person at a sit-down restaurant.', hrs:'Daily from 6am' },
+
+  /* ---------------- FCO ---------------- */
+  { a:'FCO', t:'Terminal 1', g:null, lvl:null, n:'Prima Vista Lounge', k:'Lounge', req:['pp-lounge'], v:50, get:'Hot buffet, bar and runway views. The best-rated lounge at Fiumicino.', hrs:'5:15am–9:45pm', flag:'Pre-booking available.' },
+  { a:'FCO', t:'Terminal 1', g:null, lvl:null, n:'Plaza Premium Lounge', k:'Lounge', req:['pp-lounge','plaza-premium'], v:55, get:'Buffet, bar and shower suites.', hrs:'4:30am–9:30pm' },
+  { a:'FCO', t:'Terminal 1', g:null, lvl:null, n:'TAV Primeclass Lounge', k:'Lounge', req:['pp-lounge'], v:48, get:'Hot buffet and bar.', hrs:'5:30am–10pm' },
+  { a:'FCO', t:'Terminal 3', g:null, lvl:null, n:'Prima Vista Lounge — Portus', k:'Lounge', req:['pp-lounge'], v:50, get:'Hot buffet, bar and quiet seating.', hrs:'5:45am–10:45pm', flag:'Pre-booking available.' },
+  { a:'FCO', t:'Terminal 3', g:null, lvl:null, n:'Plaza Premium Lounge', k:'Lounge', req:['pp-lounge','plaza-premium'], v:55, get:'Buffet, bar and shower suites.', hrs:'5am–10:30pm' },
+
+  /* ---------------- MAD ---------------- */
+  { a:'MAD', t:'Terminal 1', g:null, lvl:null, n:'Sala Cibeles', k:'Lounge', req:['pp-lounge'], v:45, get:'Buffet, bar and quiet seating. The best-rated of the Madrid salas.', hrs:'Open 24 hours' },
+  { a:'MAD', t:'Terminal 2', g:null, lvl:null, n:'Sala Puerta de Alcalá', k:'Lounge', req:['pp-lounge'], v:45, get:'Buffet, bar and workspace.', hrs:'Open 24 hours' },
+  { a:'MAD', t:'Terminal 3', g:null, lvl:null, n:'Sala Puerta del Sol', k:'Lounge', req:['pp-lounge'], v:45, get:'Buffet, bar and quiet seating.', hrs:'5am–7pm' },
+  { a:'MAD', t:'Terminal 4', g:null, lvl:null, n:'Sala Plaza Mayor', k:'Lounge', req:['pp-lounge'], v:45, get:'Hot buffet, bar and shower suites.', hrs:'5am–10pm' },
+  { a:'MAD', t:'Terminal 4', g:null, lvl:null, n:'Aerotel Madrid', k:'Lounge', req:['pp-lounge'], v:45, get:'Airside hotel lounge with showers and day rooms.', hrs:'6am–2pm' },
+  { a:'MAD', t:'Terminal 4 Satellite', g:null, lvl:null, n:'Sala Neptuno', k:'Lounge', req:['pp-lounge'], v:45, get:'Buffet, bar and quiet seating.', hrs:'Open 24 hours' },
+  { a:'MAD', t:'Terminal 4', g:null, lvl:null, n:'Olivia & Bellota', k:'Dining', req:['pp-restaurant'], v:28, get:'A meal credit per person. Spanish ham, tapas and wine.', hrs:'5:30am–9pm' },
+  { a:'MAD', t:'Terminal 4 Satellite', g:null, lvl:null, n:'Soho', k:'Dining', req:['pp-restaurant'], v:28, get:'A meal credit per person at a sit-down restaurant.', hrs:'5am–midnight' },
+  { a:'MAD', t:'Terminal 3', g:null, lvl:null, n:'Pannus', k:'Dining', req:['pp-restaurant'], v:28, get:'A meal credit per person. Bakery and café menu.', hrs:'4:30am–9pm' },
+  { a:'MAD', t:'Terminal 4 Satellite', g:null, lvl:null, n:'GettSleep', k:'Nap suite', req:['pp-experience'], v:45, get:'A private sleep pod, complimentary for a set period.', hrs:'Open 24 hours' },
+
+  /* ---------------- YYZ ---------------- */
+  { a:'YYZ', t:'T1 Domestic', g:'D20', lvl:null, n:'Plaza Premium Lounge', k:'Lounge', req:['pp-lounge','plaza-premium'], v:55, get:'Hot buffet, bar and shower suites.', hrs:'5:30am–11:59pm' },
+  { a:'YYZ', t:'T1 US Transborder', g:null, lvl:null, n:'Plaza Premium Lounge', k:'Lounge', req:['pp-lounge','plaza-premium'], v:55, get:'Buffet, bar and showers.', hrs:'5:30am–9pm', flag:'After US preclearance — you cannot return to the rest of Terminal 1.' },
+  { a:'YYZ', t:'T1 International', g:'E77', lvl:null, n:'Plaza Premium Lounge', k:'Lounge', req:['pp-lounge','plaza-premium'], v:55, get:'Hot buffet, bar and shower suites.', hrs:'3pm–10:30pm', flag:'In the Infield Concourse, reached by shuttle from the main pier.' },
+  { a:'YYZ', t:'T3 International', g:'B24', lvl:null, n:'Plaza Premium Lounge', k:'Lounge', req:['pp-lounge','plaza-premium'], v:55, get:'Hot buffet, bar and shower suites.', hrs:'5:30am–1am' },
+  { a:'YYZ', t:'T3 Domestic', g:null, lvl:null, n:'Plaza Premium Lounge', k:'Lounge', req:['pp-lounge','plaza-premium'], v:55, get:'Buffet, bar and workspace.', hrs:'5:30am–10pm' },
+  { a:'YYZ', t:'T3 US Departures', g:null, lvl:null, n:'Plaza Premium Lounge', k:'Lounge', req:['pp-lounge','plaza-premium'], v:55, get:'Buffet, bar and quiet seating.', hrs:'5:30am–7pm', flag:'After US preclearance — you cannot return to the rest of Terminal 3.' },
+  { a:'YYZ', t:'T3 International', g:null, lvl:null, n:'KLM Crown Lounge', k:'Lounge', req:['pp-lounge'], v:55, get:'Hot buffet, bar and Dutch design.', hrs:'8am–8:30pm' },
+  { a:'YYZ', t:'T3 International', g:null, lvl:null, n:'Be Relax Spa', k:'Spa', req:['pp-experience'], v:40, get:'One complimentary treatment.', hrs:'9am–7pm' },
+  { a:'YYZ', t:'T1 US Transborder', g:null, lvl:null, n:'Be Relax Spa', k:'Spa', req:['pp-experience'], v:40, get:'One complimentary treatment.', hrs:'9am–7pm' },
+  { a:'YYZ', t:'T1 Domestic', g:null, lvl:null, n:'Be Relax Spa', k:'Spa', req:['pp-experience'], v:40, get:'One complimentary treatment.', hrs:'9am–7pm' },
+
+  /* ---------------- YVR ---------------- */
+  { a:'YVR', t:'International', g:null, lvl:null, n:'SkyTeam Lounge', k:'Lounge', req:['pp-lounge'], v:60, get:'Made-to-order food stations, local craft beer and panoramic runway views. Rated among the best Priority Pass lounges anywhere.', hrs:'Open 24 hours' },
+  { a:'YVR', t:'International', g:null, lvl:null, n:'Plaza Premium Lounge', k:'Lounge', req:['pp-lounge','plaza-premium'], v:55, get:'Hot buffet, bar and shower suites.', hrs:'6:30am–11:59pm' },
+  { a:'YVR', t:'US Transborder', g:null, lvl:null, n:'Plaza Premium Lounge', k:'Lounge', req:['pp-lounge','plaza-premium'], v:55, get:'Buffet, bar and showers.', hrs:'4:45am–9pm', flag:'After US preclearance — you cannot return to the rest of the terminal.' },
+  { a:'YVR', t:'Domestic', g:null, lvl:null, n:'Plaza Premium Lounge', k:'Lounge', req:['pp-lounge','plaza-premium'], v:55, get:'Hot buffet, bar and quiet seating.', hrs:'5am–10pm' },
+  { a:'YVR', t:'Domestic', g:null, lvl:null, n:'Plaza Premium Lounge (North)', k:'Lounge', req:['pp-lounge','plaza-premium'], v:55, get:'Buffet, bar and workspace.', hrs:'6:45am–8:30pm' }
+
 
 ];
 
