@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Every perk your credit cards actually unlock at 31 airports across the US, Europe and Canada — sorted by how far it is from your gate.">
+<meta name="description" content="Every perk your credit cards actually unlock at 31 airports — lounges, gaming, spas, golf, dining credits — sorted by how far it is from your gate.">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#16202B">
 <meta property="og:title" content="Layover">
@@ -941,7 +941,7 @@
       </div>
       <span class="stamp">31 airports &middot; Verified Sep 2026</span>
     </div>
-    <p>Every perk your cards actually unlock at this airport &mdash; lounges, gaming, spa treatments, dining credits &mdash; sorted by how far it is from your gate.</p>
+    <p>Every perk your cards actually unlock at this airport &mdash; lounges, gaming, spas, golf, chiropractic, dining credits &mdash; sorted by how far it is from your gate.</p>
   </header>
 
   <nav class="tabs" role="tablist">
@@ -1028,7 +1028,7 @@
   </div><!-- /panel-plan -->
 
   <footer>
-    <p><b>Prototype.</b> Perk data is hand-curated across 31 airports and 32 cards, and reflects public sources as of September 2026. Airport benefits change constantly &mdash; lounges leave networks, restaurants drop out, terminals get reassigned. Confirm in your issuer's app before you count on anything here.</p>
+    <p><b>Prototype.</b> Perk data is hand-curated across 31 airports and 32 cards, and drawn from Priority Pass's own listings rather than lounge round-ups, which under-report the non-lounge venues, and reflects public sources as of September 2026. Airport benefits change constantly &mdash; lounges leave networks, restaurants drop out, terminals get reassigned. Confirm in your issuer's app before you count on anything here.</p>
     <p><b>Open now</b> is calculated in the airport's own timezone, not your phone's. Venues with irregular hours show their schedule without a badge rather than risk a wrong one, and anything shut drops to the bottom of its terminal.</p>
     <p><b>Abroad, the card mix changes.</b> Chase Sapphire Lounges, Capital One Lounges, Delta Sky Clubs and Admirals Clubs are almost entirely US-only. Outside the US it is Priority Pass, Plaza Premium and airline lounges doing the work, with exactly one Centurion Lounge in Europe &mdash; Heathrow Terminal 3. Priority Pass is also markedly stronger abroad than it is at home.</p>
     <p><b>Preclearance and Schengen.</b> Dublin, Toronto and Vancouver clear US immigration before you fly, and once through you cannot go back &mdash; so a lounge on the wrong side is no lounge at all. European airports split Schengen from non-Schengen behind passport control. Both are flagged on the airports affected.</p>
@@ -1399,8 +1399,6 @@ const PERKS = [
   { a:'SFO', t:'Terminal 2', g:'D8',  lvl:null,                 n:'Lark Creek Grill',          k:'Dining',    req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Californian sit-down menu.', hrs:'Daily from 6am' },
   { a:'SFO', t:'Terminal 3', g:'E4',  lvl:null,                 n:'United Club',               k:'Lounge',    req:['united-club','military-uniform'],   v:59, get:'Snacks, bar and workspace.', hrs:'5am–11:30pm', flag:'Requires a same-day United or Star Alliance flight.' },
   { a:'SFO', t:'Terminal 3', g:'F11', lvl:null,                 n:'United Club',               k:'Lounge',    req:['united-club','military-uniform'],   v:59, get:'Snacks, bar and workspace.', hrs:'5am–11:30pm', flag:'Requires a same-day United or Star Alliance flight.' },
-  { a:'SFO', t:'Terminal 3', g:'E6',  lvl:null,                 n:'San Francisco Giants Clubhouse', k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Ballpark-themed bar and grill.', hrs:'Daily from 6am' },
-  { a:'SFO', t:'Terminal 3', g:'F3',  lvl:null,                 n:'Yankee Pier',               k:'Dining',    req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Seafood and a raw bar.', hrs:'Daily from 6am' },
   { a:'SFO', t:'International Terminal A', g:'A3', lvl:'Level 4, two levels up', n:'Golden Gate Lounge', k:'Lounge', req:['pp-lounge'], v:50, get:'Hot buffet, bar and shower suites. The best Priority Pass option at SFO.', hrs:'7am–11:30pm' },
   { a:'SFO', t:'International Terminal A', g:'A2', lvl:'Level 4, two levels up', n:'China Airlines Dynasty Lounge', k:'Lounge', req:['pp-lounge'], v:45, get:'Noodle bar and full bar.', hrs:'8am–8:30pm' },
   { a:'SFO', t:'International Terminal A', g:'A1', lvl:'Level 4, two levels up', n:'Air India Maharaja Lounge', k:'Lounge', req:['pp-lounge'], v:45, get:'Indian buffet and bar.', hrs:'6am–11:55pm' },
@@ -1533,7 +1531,7 @@ const PERKS = [
   { a:'ATL', t:'Concourse F', g:'F6', lvl:null, n:'Minute Suites', k:'Nap suite', req:['pp-experience'], v:65, get:'One free hour in a private suite with a daybed.', hrs:'Open 24 hours' },
   { a:'ATL', t:'Concourse B', g:'B22', lvl:null, n:'Be Relax Spa', k:'Spa', req:['pp-experience'], v:40, get:'One free massage, nail service or aromatherapy treatment.', hrs:'7am–10pm' },
   { a:'ATL', t:'Concourse A', g:null, lvl:null, n:'XpresSpa', k:'Spa', req:['pp-experience'], v:30, get:'25 free minutes in a massage chair or on wellness equipment.', hrs:'6am–10pm' },
-  { a:'ATL', t:'Concourse D', g:null, lvl:null, n:'XpresSpa', k:'Spa', req:['pp-experience'], v:30, get:'25 free minutes in a massage chair or on wellness equipment.', hrs:'6am–10pm' },
+  { a:'ATL', t:'Concourse C', g:null, lvl:null, n:'XpresSpa', k:'Spa', req:['pp-experience'], v:30, get:'25 free minutes in a massage chair or on wellness equipment.', hrs:'6am–10pm' },
   { a:'ATL', t:'Concourse T', g:null, lvl:'Third floor, outside security', elig:'Active duty, Reserve, Guard and immediate families with a DoD ID. Veterans without a DoD ID are not admitted.', n:'USO Lounge', k:'Military', req:['military'], v:50, get:'Snacks, Wi-Fi, charging and TV.', hrs:'8am–8pm', flag:'In the domestic terminal atrium outside security — you would have to re-screen afterwards.' },
 
   /* ---------------- ORD ---------------- */
@@ -1599,7 +1597,7 @@ const PERKS = [
 
   /* ---------------- MSP ---------------- */
   { a:'MSP', t:'Concourse E', g:null, lvl:null, n:'Escape Lounge', k:'Lounge', req:['pp-lounge','centurion','delta-sky'], v:45, get:'Hot food, bar and quiet seating. Just before the Concourse E entrance.', hrs:'4am–9pm', flag:'Free for Amex Platinum and Delta Reserve holders travelling on Delta that day, and for Priority Pass members.' },
-  { a:'MSP', t:'Concourse C', g:null, lvl:null, n:'PGA MSP', k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Golf-themed bar and grill with simulators.', hrs:'6am–9pm' },
+  { a:'MSP', t:'Concourse C', g:null, lvl:null, n:'PGA MSP Lounge', k:'Lounge', req:['pp-lounge'], v:45, get:'Golf-themed lounge with hot food, a bar and swing simulators.', hrs:'8am–8pm' },
   { a:'MSP', t:'Concourse G', g:'G18', lvl:null, n:'Delta Sky Club', k:'Lounge', req:['delta-sky'], v:59, get:'The newest and largest club at MSP. Reached via the South checkpoint.', hrs:'5am–9pm', flag:'Requires a same-day Delta flight.' },
   { a:'MSP', t:'Concourse F', g:null, lvl:null, n:'Delta Sky Club', k:'Lounge', req:['delta-sky'], v:59, get:'Buffet and bar in the F/G connector.', hrs:'5am–9pm', flag:'Requires a same-day Delta flight.' },
   { a:'MSP', t:'Concourse E', g:'E6', lvl:null, n:'United Club', k:'Lounge', req:['united-club','military-uniform'], v:59, get:'Snacks, bar and workspace.', hrs:'5am–8pm', flag:'Requires a same-day United or Star Alliance flight.' },
@@ -1645,13 +1643,12 @@ const PERKS = [
   { a:'DCA', t:'Concourse C', g:null, lvl:null, n:'American Tap Room', k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Sit-down American menu.', hrs:'Daily from 6am' },
   { a:'DCA', t:'Concourse B', g:null, lvl:null, n:'Bracket Room', k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Sports bar and grill.', hrs:'Daily from 6am' },
   { a:'DEN', t:'Concourse A', g:null, lvl:null, n:'Mercantile Dining & Provisions', k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Farm-to-table Denver spin-off.', hrs:'Daily from 6am' },
-  { a:'DEN', t:'Concourse B', g:null, lvl:null, n:'SweetWater Mountain Taphouse', k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Colorado taphouse and grill.', hrs:'Daily from 6am' },
   { a:'DFW', t:'Terminal E', g:null, lvl:null, n:"Drew Pearson's Sport 88", k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Sports bar and grill.', hrs:'Daily from 6am' },
   { a:'DTW', t:'Evans Terminal', g:null, lvl:null, n:"Anita's Kitchen", k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Lebanese and Mediterranean menu.', hrs:'Daily from 6am' },
   { a:'IAH', t:'Terminal A', g:null, lvl:null, n:'Cadillac Mexican Kitchen & Tequila Bar', k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Tex-Mex and a tequila list.', hrs:'Daily from 6am' },
   { a:'IAH', t:'Terminal C', g:null, lvl:null, n:"Landry's Seafood", k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Sit-down seafood.', hrs:'Daily from 6am' },
   { a:'SEA', t:'North Satellite', g:null, lvl:null, n:'Bambuza Vietnam Kitchen', k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Vietnamese noodles and banh mi.', hrs:'Daily from 6am' },
-  { a:'SEA', t:'Central Terminal', g:null, lvl:null, n:'Ninth & Pike Artisan Kitchen', k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Pike Place-inspired market kitchen.', hrs:'Daily from 6am' },
+  { a:'SEA', t:'Concourse C', g:null, lvl:null, n:'Ninth & Pike Artisan Kitchen', k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Pike Place-inspired market kitchen.', hrs:'Daily from 6am' },
   { a:'MIA', t:'Concourse D', g:null, lvl:null, n:'Corona Beach House', k:'Dining', req:['pp-restaurant'], v:28, get:'$28 off your bill, per person. Open-air bar and grill.', hrs:'Daily from 7am' },
 
   /* ---------------- LHR ---------------- */
@@ -1725,7 +1722,37 @@ const PERKS = [
   { a:'YVR', t:'International', g:null, lvl:null, n:'Plaza Premium Lounge', k:'Lounge', req:['pp-lounge','plaza-premium'], v:55, get:'Hot buffet, bar and shower suites.', hrs:'6:30am–11:59pm' },
   { a:'YVR', t:'US Transborder', g:null, lvl:null, n:'Plaza Premium Lounge', k:'Lounge', req:['pp-lounge','plaza-premium'], v:55, get:'Buffet, bar and showers.', hrs:'4:45am–9pm', flag:'After US preclearance — you cannot return to the rest of the terminal.' },
   { a:'YVR', t:'Domestic', g:null, lvl:null, n:'Plaza Premium Lounge', k:'Lounge', req:['pp-lounge','plaza-premium'], v:55, get:'Hot buffet, bar and quiet seating.', hrs:'5am–10pm' },
-  { a:'YVR', t:'Domestic', g:null, lvl:null, n:'Plaza Premium Lounge (North)', k:'Lounge', req:['pp-lounge','plaza-premium'], v:55, get:'Buffet, bar and workspace.', hrs:'6:45am–8:30pm' }
+  { a:'YVR', t:'Domestic', g:null, lvl:null, n:'Plaza Premium Lounge (North)', k:'Lounge', req:['pp-lounge','plaza-premium'], v:55, get:'Buffet, bar and workspace.', hrs:'6:45am–8:30pm' },
+
+  /* ---------------- Non-lounge experiences missed on the first pass ---------------- */
+  { a:'DEN', t:'Concourse A', g:null, lvl:null, n:'Golf DEN', k:'Golf', req:['pp-experience'], v:40, get:'25 minutes on a golf simulator, plus a snack and a discount on anything else you order.', hrs:'7am–7pm' },
+
+  { a:'ATL', t:'Concourse A', g:null, lvl:null, n:'The Chiroport', k:'Wellness', req:['pp-experience'], v:79, get:'A 20-minute hands-on stretch and massage with a chiropractor. Normally $79.', hrs:'7am–7pm', flag:'By the main rotunda, next to the Delta help desk.' },
+  { a:'DFW', t:'Terminal A', g:'A29', lvl:null, n:'The Chiroport', k:'Wellness', req:['pp-experience'], v:79, get:'A 20-minute hands-on stretch and massage with a chiropractor. Normally $79.', hrs:'7am–7pm' },
+  { a:'LAS', t:'Concourse B', g:'B10', lvl:null, n:'The Chiroport', k:'Wellness', req:['pp-experience'], v:79, get:'A 20-minute hands-on stretch and massage with a chiropractor. Normally $79.', hrs:'8am–6pm' },
+  { a:'LAS', t:'Concourse C', g:'C24', lvl:null, n:'The Chiroport', k:'Wellness', req:['pp-experience'], v:79, get:'A 20-minute hands-on stretch and massage with a chiropractor. Normally $79.', hrs:'8am–6pm' },
+  { a:'MSP', t:'Concourse G', g:'G9', lvl:null, n:'The Chiroport', k:'Wellness', req:['pp-experience'], v:79, get:'A 20-minute hands-on stretch and massage with a chiropractor. Normally $79.', hrs:'7am–7pm' },
+  { a:'MSP', t:'Concourse F', g:'F7', lvl:null, n:'The Chiroport', k:'Wellness', req:['pp-experience'], v:79, get:'A 20-minute hands-on stretch and massage with a chiropractor. Normally $79.', hrs:'7am–7pm' },
+  { a:'MSP', t:'Concourse C', g:'C12', lvl:null, n:'The Chiroport', k:'Wellness', req:['pp-experience'], v:79, get:'A 20-minute hands-on stretch and massage with a chiropractor. Normally $79.', hrs:'7am–8pm', flag:'Across from the Delta Sky Club.' },
+
+  { a:'ATL', t:'Concourse F', g:null, lvl:null, n:'Poppin', k:'Lounge', req:['pp-lounge'], v:45, get:'A smaller lounge with snacks, drinks and quiet seating.', hrs:'11am–10pm' },
+  { a:'ATL', t:'Concourse E', g:null, lvl:null, n:'XpresSpa', k:'Spa', req:['pp-experience'], v:30, get:'25 free minutes in a massage chair or on wellness equipment.', hrs:'6am–10pm' },
+
+  { a:'JFK', t:'Terminal 4', g:'B24', lvl:null, n:'Xwell', k:'Spa', req:['pp-experience'], v:30, get:'25 free minutes of massage or wellness treatment.', hrs:'8am–10pm' },
+  { a:'JFK', t:'Terminal 4', g:'A5', lvl:null, n:'Xwell', k:'Spa', req:['pp-experience'], v:30, get:'25 free minutes of massage or wellness treatment.', hrs:'8am–10pm' },
+
+  { a:'MSP', t:'Concourse C', g:null, lvl:null, n:'Portal Lounge', k:'Lounge', req:['pp-lounge'], v:45, get:'Buffet, bar and quiet seating.', hrs:'4am–9pm', flag:'Somewhere in Terminal 1 — Priority Pass does not publish which concourse, so check the app before walking.' },
+
+  { a:'SEA', t:'North Satellite', g:null, lvl:null, n:"PF Chang's", k:'Dining', req:['pp-restaurant'], v:28, get:'A meal credit per person. Sit-down Asian menu.', hrs:'6am–10pm' },
+  { a:'SEA', t:'Central Terminal', g:null, lvl:null, n:'Brewtop Social', k:'Dining', req:['pp-restaurant'], v:28, get:'A meal credit per person. Taphouse and grill.', hrs:'5:30am–noon' },
+
+  { a:'ORD', t:'Terminal 5', g:null, lvl:null, n:'Wingtips Lounge', k:'Lounge', req:['pp-lounge'], v:50, get:'Hot buffet, full bar and shower suites.', hrs:'9am–10pm' },
+
+  { a:'SFO', t:'Terminal 3', g:null, lvl:null, n:'Aletitude', k:'Dining', req:['pp-restaurant'], v:28, get:'A meal credit per person. Californian menu and bar.', hrs:'Daily from 6am' },
+
+  { a:'LAS', t:'Concourse B', g:null, lvl:null, n:'XpresSpa', k:'Spa', req:['pp-experience'], v:30, get:'25 free minutes in a massage chair or on wellness equipment.', hrs:'7am–11pm' },
+  { a:'DFW', t:'Terminal A', g:null, lvl:null, n:'XpresSpa', k:'Spa', req:['pp-experience'], v:30, get:'25 free minutes in a massage chair or on wellness equipment.', hrs:'6am–10pm' }
+
 
 
 ];
